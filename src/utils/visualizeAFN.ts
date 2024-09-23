@@ -1,9 +1,4 @@
-feat(visualization): add function to visualize NFA transitions
-
-- Import `Automaton` and `State` classes
-- Implement `visualizeNFA` function to generate a list of transitions for a given NFA
-- Use BFS to traverse states and record transitions
-- Handle epsilon transitions and map state IDs for visualizationimport { Automaton, State } from "./automaton";
+import { Automaton, State } from "./automaton";
 
 export function visualizeNFA(automaton: Automaton): string[] {
   const visited = new Set<State>();
