@@ -12,9 +12,9 @@ function createBase(symbol: string): Automaton {
 function concatenate(
   automaton1: Automaton,
   automaton2: Automaton,
-  //symbol: string
+  symbol: string
 ): Automaton {
-  automaton1.acceptState.addTransition('&', automaton2.startState);
+  automaton1.acceptState.addTransition(symbol,automaton2.acceptState);
   return new Automaton(automaton1.startState, automaton2.acceptState);
 }
 
@@ -61,59 +61,85 @@ function optional(automaton: Automaton): Automaton {
 }
 
 export function buildNFAFromRegex(regex: string): Automaton {
-    const stack: Automaton[] = [];
-    const operators: string[] = [];
-  
-    const precedence: { [key: string]: number } = {
-      '|': 1,
-      '.': 2,
-      '*': 3,
-      '?': 3
-    };
-  
-    const processOperator = (operator: string) => {
-      if (operator === '|') {
-        const a2 = stack.pop();
-        const a1 = stack.pop();
-        if (a1 && a2) stack.push(union(a1, a2));
-      } else if (operator === '.') {
-        const a2 = stack.pop();
-        const a1 = stack.pop();
-        console.log(a1, a2);
-        if (a1 && a2) stack.push(concatenate(a1, a2));
-      } else if (operator === '*') {
-        const a = stack.pop();
-        if (a) stack.push(kleeneStar(a));
-      } else if (operator === '?') {
-        const a = stack.pop();
-        if (a) stack.push(optional(a));
-      }
-    };
-  
-    for (let i = 0; i < regex.length; i++) {
-      const char = regex[i];
-        console.log(stack)
-        console.log(operators)
-      if (char === '(') {
-        operators.push(char);
-      } else if (char === ')') {
-        while (operators.length && operators[operators.length - 1] !== '(') {
-          processOperator(operators.pop() as string);
-        }
-        operators.pop();
-      } else if (char === '|' || char === '.' || char === '*' || char === '?') {
-        while (operators.length && precedence[operators[operators.length - 1]] >= precedence[char]) {
-          processOperator(operators.pop() as string);
-        }   
-        operators.push(char);
+  const stack: Automaton[] = [];
+
+  for (let i = 0; i < regex.length; i++) {
+    const char = regex[i];
+
+    if (char === "(") {
+      //Logica para cuando sea asi
+    } else {
+      const automaton = createBase(char);
+      if (regex[i + 1] === "*") {
+        stack.push(kleeneStar(automaton));
+      } else if (regex[i + 1] === "+") {
+        stack.push(kleenePlus(automaton));
+      } else if (regex[i + 1] === "?") {
+        stack.push(optional(automaton));
       } else {
-        stack.push(createBase(char));
+        stack.push(automaton);
       }
     }
-  
-    while (operators.length) {
-      processOperator(operators.pop() as string);
+
+    if (stack.length == 2) {
+      const a2 = stack.pop();
+      const a1 = stack.pop();
+      if (a1 && a2) stack.push(concatenate(a1, a2, char));
     }
-  
-    return stack.pop() as Automaton;
   }
+
+  // const operators: string[] = [];
+
+  // const precedence: { [key: string]: number } = {
+  //   '|': 1,
+  //   '.': 2,
+  //   '*': 3,
+  //   '?': 3
+  // };
+
+  // const processOperator = (operator: string) => {
+  //   if (operator === '|') {
+  //     const a2 = stack.pop();
+  //     const a1 = stack.pop();
+  //     if (a1 && a2) stack.push(union(a1, a2));
+  //   } else if (operator === '.') {
+  //     const a2 = stack.pop();
+  //     const a1 = stack.pop();
+  //     console.log(a1, a2);
+  //     if (a1 && a2) stack.push(concatenate(a1, a2));
+  //   } else if (operator === '*') {
+  //     const a = stack.pop();
+  //     if (a) stack.push(kleeneStar(a));
+  //   } else if (operator === '?') {
+  //     const a = stack.pop();
+  //     if (a) stack.push(optional(a));
+  //   }
+  // };
+
+  // for (let i = 0; i < regex.length; i++) {
+  //   const char = regex[i];
+  //     console.log(stack)
+  //     console.log(operators)
+  //   if (char === '(') {
+  //     operators.push(char);
+  //   } else if (char === ')') {
+  //     while (operators.length && operators[operators.length - 1] !== '(') {
+  //       processOperator(operators.pop() as string);
+  //     }
+  //     operators.pop();
+  //   } else if (char === '|' || char === '.' || char === '*' || char === '?') {
+  //     while (operators.length && precedence[operators[operators.length - 1]] >= precedence[char]) {
+  //       processOperator(operators.pop() as string);
+  //     }
+  //     operators.push(char);
+  //   } else {
+  //     stack.push(createBase(char));
+  //   }
+  // }
+
+  // while (operators.length) {
+  //   processOperator(operators.pop() as string);
+  // }
+
+  return stack.pop() as Automaton;
+}
