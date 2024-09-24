@@ -1,35 +1,34 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import { buildNFAFromRegex } from '../utils/Thompson';
-import { visualizeNFA } from '../utils/visualizeAFN';
+import AutomatonGraph from './AutomatonGraph';
+import { Automaton } from '../utils/Automaton';
 
-const AutomataBuilder: React.FC = () => {
-  const [regex, setRegex] = useState<string>("");
-  const [transitions, setTransitions] = useState<string[]>([]);
+const App: React.FC = () => {
+  const [regex, setRegex] = useState<string>(''); // Expresión regular ingresada por el usuario
+  const [automaton, setAutomaton] = useState<Automaton | null>(null);
 
-  const handleBuildAutomaton = () => {
-    const nfa = buildNFAFromRegex(regex);
-    const transitionList = visualizeNFA(nfa);
-    setTransitions(transitionList);
+  const handleBuildNFA = () => {
+    const nfa = buildNFAFromRegex(regex); // Construir el autómata usando la función de Thompson
+    setAutomaton(nfa); // Actualizar el autómata
   };
 
   return (
     <div>
-      <h2>Automaton Builder</h2>
-      <input
-        type="text"
-        value={regex}
-        onChange={(e) => setRegex(e.target.value)}
-        placeholder="Enter Regular Expression"
-      />
-      <button onClick={handleBuildAutomaton}>Build NFA</button>
-      <h3>Transitions:</h3>
-      <ul>
-        {transitions.map((t, index) => (
-          <li key={index}>{t}</li>
-        ))}
-      </ul>
+      <h1>Automata Finito No Determinista (NFA)</h1>
+      <div>
+        <input
+          type="text"
+          value={regex}
+          onChange={(e) => setRegex(e.target.value)}
+          placeholder="Enter regular expression"
+        />
+        <button onClick={handleBuildNFA}>Build NFA</button>
+      </div>
+
+      {/* Renderizar el gráfico del autómata si existe */}
+      {automaton && <AutomatonGraph automaton={automaton} />}
     </div>
   );
 };
 
-export default AutomataBuilder;
+export default App;

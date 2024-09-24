@@ -1,28 +1,33 @@
-import { Automaton, State } from "./automaton";
+import { Automaton, State } from "./Automaton";
 
-export function visualizeNFA(automaton: Automaton): string[] {
-  const visited = new Set<State>();
-  const queue: State[] = [automaton.startState];
-  let stateId = 0;
-  const stateMap = new Map<State, number>();
+// Convierte el autómata en un formato DOT que puede ser visualizado por viz.js
+export function visualizeNFA(automaton: Automaton): string {
+  let dot = 'digraph NFA {\n  rankdir=LR;\n  node [shape=circle];\n'; // Inicializa el DOT
 
-  const transitions: string[] = [];
+  const visited = new Set<State>(); // Para evitar visitar estados repetidos
+  const queue: State[] = [automaton.startState]; // Comenzamos desde el estado inicial
 
+  // Mientras haya estados por procesar
   while (queue.length > 0) {
-    const state = queue.shift() as State;
-    if (visited.has(state)) continue;
-    visited.add(state);
+    const currentState = queue.shift() as State;
 
-    const currentStateId = stateMap.get(state) || stateId++;
-    stateMap.set(state, currentStateId);
+    if (visited.has(currentState)) continue; // Evitar repetir estados ya procesados
+    visited.add(currentState); // Marcamos este estado como procesado
 
-    state.transitions.forEach(({ symbol, state: nextState }) => {
-      const nextStateId = stateMap.get(nextState) || stateId++;
-      stateMap.set(nextState, nextStateId);
-      transitions.push(`State ${currentStateId} --${symbol || 'ε'}--> State ${nextStateId}`);
-      if (!visited.has(nextState)) queue.push(nextState);
+    // Si es un estado de aceptación, lo mostramos con doble círculo
+    if (currentState.isAccepting) {
+      dot += `  ${currentState.id} [shape=doublecircle];\n`;
+    }
+
+    // Procesamos las transiciones de este estado
+    currentState.transitions.forEach(({ symbol, state: nextState }) => {
+      dot += `  ${currentState.id} -> ${nextState.id} [label="${symbol || 'ε'}"];\n`;
+      if (!visited.has(nextState)) {
+        queue.push(nextState); // Agregar el siguiente estado a la cola si no ha sido visitado
+      }
     });
   }
 
-  return transitions;
+  dot += '}'; // Cerrar el grafo DOT
+  return dot;
 }
