@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { buildNFAFromRegex } from '../utils/Thompson';
+import { buildNFAFromRegex } from '../utils/BuildNFA';
 import AutomatonGraph from './AutomatonGraph';
 import { Automaton } from '../utils/Automaton';
 
