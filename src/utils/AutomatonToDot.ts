@@ -9,15 +9,21 @@ export function visualizeNFA(automaton: Automaton): string {
 
     let dot = 'digraph NFA {\n  rankdir=LR;\n  node [shape=circle];\n'; // Inicializa el DOT
 
+    // Asigna un id numérico al estado de inicio
+    const startStateId = stateId++;
+    stateMap.set(automaton.startState, startStateId);
+
+    // Agregar una flecha al estado de inicio
+    dot += `  start [shape=point];\n  start -> ${startStateId};\n`;
+
     // Bucle para recorrer el autómata y agregar las transiciones
     while (queue.length > 0) {
         const state = queue.shift() as State;
         if (visited.has(state)) continue;
         visited.add(state);
 
-        // Asigna un id numérico al estado si no lo tiene aún
-        const currentStateId = stateMap.get(state) || stateId++;
-        stateMap.set(state, currentStateId);
+        // Obtener el id del estado actual
+        const currentStateId = stateMap.get(state) as number;
 
         // Marcar el estado como de aceptación si es necesario
         if (state.isAccepting) {
