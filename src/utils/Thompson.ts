@@ -5,6 +5,7 @@ export function createBase(symbol: string): Automaton {
   const start = createState();
   const accept = createState();
   start.addTransition(symbol, accept);
+  accept.isAccepting = true;
   return new Automaton(start, accept);
 }
 
@@ -26,6 +27,11 @@ export function union(automaton1: Automaton, automaton2: Automaton): Automaton {
   start.addTransition("&", automaton2.startState);
   automaton1.acceptState.addTransition("&", accept);
   automaton2.acceptState.addTransition("&", accept);
+  //Poner en falso los estados de finalizacion de lo dos automatas
+  automaton1.acceptState.isAccepting = false;
+  automaton2.acceptState.isAccepting = false;
+  //Establecer el nuevo estado de finalizacion
+  accept.isAccepting = true; 
   return new Automaton(start, accept);
 }
 
@@ -37,6 +43,11 @@ export function kleeneStar(automaton: Automaton): Automaton {
   start.addTransition("&", accept);
   automaton.acceptState.addTransition("&", automaton.startState);
   automaton.acceptState.addTransition("&", accept);
+  //Poner en falso los estados de finalizacion de lo dos automatas
+  automaton.acceptState.isAccepting = false;
+  //Establecer el nuevo estado de finalizacion
+  accept.isAccepting = true;
+  accept.isAccepting = true
   return new Automaton(start, accept);
 }
 
@@ -47,6 +58,10 @@ export function kleenePlus(automaton: Automaton): Automaton {
   start.addTransition("&", automaton.startState);
   automaton.acceptState.addTransition("&", automaton.startState);
   automaton.acceptState.addTransition("&", accept);
+  //Poner en falso los estados de finalizacion de lo dos automatas
+  automaton.acceptState.isAccepting = false;
+  //Establecer el nuevo estado de finalizacion
+  accept.isAccepting = true
   return new Automaton(start, accept);
 }
 
@@ -57,6 +72,10 @@ export function optional(automaton: Automaton): Automaton {
   start.addTransition("&", automaton.startState);
   start.addTransition("&", accept);
   automaton.acceptState.addTransition("&", accept);
+  //Poner en falso los estados de finalizacion de lo dos automatas
+  automaton.acceptState.isAccepting = false;
+  //Establecer el nuevo estado de finalizacion
+  accept.isAccepting = true;
   return new Automaton(start, accept);
 }
 
