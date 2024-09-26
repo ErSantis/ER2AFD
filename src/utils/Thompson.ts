@@ -13,8 +13,8 @@ export function createBase(symbol: string): Automaton {
 export function concatenate(automaton1: Automaton, automaton2: Automaton): Automaton {
   // Copiar las transiciones del estado inicial del segundo autómata al estado de aceptación del primero
   automaton1.acceptState.transitions = [...automaton2.startState.transitions];
-  automaton1.acceptState.isAccepting = automaton2.startState.isAccepting;
-
+  automaton1.acceptState.isAccepting = false
+  automaton2.acceptState.isAccepting = true
   // Actualizar el estado de aceptación del primer autómata para que coincida con el segundo
   return new Automaton(automaton1.startState, automaton2.acceptState);
 }
@@ -31,7 +31,7 @@ export function union(automaton1: Automaton, automaton2: Automaton): Automaton {
   automaton1.acceptState.isAccepting = false;
   automaton2.acceptState.isAccepting = false;
   //Establecer el nuevo estado de finalizacion
-  accept.isAccepting = true; 
+  accept.isAccepting = true;
   return new Automaton(start, accept);
 }
 
@@ -47,7 +47,6 @@ export function kleeneStar(automaton: Automaton): Automaton {
   automaton.acceptState.isAccepting = false;
   //Establecer el nuevo estado de finalizacion
   accept.isAccepting = true;
-  accept.isAccepting = true
   return new Automaton(start, accept);
 }
 
