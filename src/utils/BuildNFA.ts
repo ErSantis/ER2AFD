@@ -1,10 +1,10 @@
 import { createBase, kleenePlus, kleeneStar, union, concatenate, optional } from './Thompson';
 import { Automaton } from './Automaton';
 
+const alphabet = new Set<string>(); // Almacenar los símbolos que forman parte del alfabeto de la ER
 export function buildNFAFromRegex(regex: string): { automaton: Automaton, alphabet: Set<string> } {
   const stack: Automaton[] = [];
   const operators: string[] = [];
-  const alphabet = new Set<string>(); // Almacenar los símbolos que forman parte del alfabeto de la ER
 
   // Función para procesar un símbolo y aplicarle un operador unario si es necesario (*, +, ?)
   const applyUnaryOperator = (automaton: Automaton, nextChar?: string | undefined): Automaton => {
