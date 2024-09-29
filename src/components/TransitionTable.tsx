@@ -1,25 +1,27 @@
 import React from 'react';
 import { Automaton, State } from '../utils/Automaton';
-import '../styles/TransitionTable.css'
+import '../styles/TransitionTable.css';
 
 interface TransitionTableProps {
     automaton: Automaton;
 }
 
-type TransitionRow = {
-    state: number;
-    a?: number[] | string;
-    b?: number[] | string;
-    '&'?: number[] | string;
-};
+// Definir una estructura que asegure que 'state' no se confunda con los símbolos
+interface TransitionRow {
+    state: number; // La propiedad state es específica y no se mezcla con los índices dinámicos
+    transitions: {
+        [symbol: string]: number[] | undefined; // El resto son símbolos dinámicos que representan las transiciones
+    };
+}
 
 const TransitionTable: React.FC<TransitionTableProps> = ({ automaton }) => {
-    const generateTable = (): TransitionRow[] => {
+    const generateTable = (): { transitions: TransitionRow[], symbols: string[] } => {
         const transitions: TransitionRow[] = [];
         const visited = new Set<State>();
         const queue: State[] = [automaton.startState];
         let stateId = 0;
         const stateMap = new Map<State, number>();
+        const symbolsSet = new Set<string>(); // Almacenar símbolos dinámicos
 
         // Asigna un id numérico al estado de inicio
         const startStateId = stateId++;
@@ -34,8 +36,8 @@ const TransitionTable: React.FC<TransitionTableProps> = ({ automaton }) => {
             // Obtener el id del estado actual
             const currentStateId = stateMap.get(state) as number;
 
-            // Crear una fila para este estado
-            const row: TransitionRow = { state: currentStateId };
+            // Crear una fila para este estado con un objeto de transiciones vacío
+            const row: TransitionRow = { state: currentStateId, transitions: {} };
 
             // Recorre todas las transiciones del estado actual
             state.transitions.forEach(({ symbol, state: nextState }) => {
@@ -46,16 +48,15 @@ const TransitionTable: React.FC<TransitionTableProps> = ({ automaton }) => {
 
                 const nextStateId = stateMap.get(nextState)!;
 
+                // Añadir el símbolo al conjunto de símbolos dinámicos (alfabeto)
+                const symbolKey = symbol || '&'; // Usamos '&' para transiciones ε
+                symbolsSet.add(symbolKey);
+
                 // Añadir las transiciones a la fila correspondiente
-                const symbolKey = symbol || '&'; // Usamos 'ε' para transiciones sin símbolo
-                if (!row[symbolKey]) {
-                    row[symbolKey] = [];
+                if (!row.transitions[symbolKey]) {
+                    row.transitions[symbolKey] = [];
                 }
-                if (typeof row[symbolKey] === 'string') {
-                    row[symbolKey] = [nextStateId];
-                } else {
-                    (row[symbolKey] as number[]).push(nextStateId);
-                }
+                (row.transitions[symbolKey] as number[]).push(nextStateId);
 
                 // Añadir el siguiente estado a la cola si aún no lo hemos visitado
                 if (!visited.has(nextState)) {
@@ -67,28 +68,28 @@ const TransitionTable: React.FC<TransitionTableProps> = ({ automaton }) => {
             transitions.push(row);
         }
 
-        return transitions;
+        return { transitions, symbols: Array.from(symbolsSet) };
     };
 
-    const transitions = generateTable();
+    const { transitions, symbols } = generateTable();
 
     return (
         <table className="transition-table">
             <thead>
                 <tr>
                     <th>State</th>
-                    <th>a</th>
-                    <th>b</th>
-                    <th>&</th>
+                    {symbols.map(symbol => (
+                        <th key={symbol}>{symbol}</th>
+                    ))}
                 </tr>
             </thead>
             <tbody>
                 {transitions.map((row, index) => (
                     <tr key={index}>
                         <td>{row.state}</td>
-                        <td>{row.a ? row.a.toString() : '-'}</td>
-                        <td>{row.b ? row.b.toString() : '-'}</td>
-                        <td>{row['&'] ? row['&'].toString() : '-'}</td>
+                        {symbols.map(symbol => (
+                            <td key={symbol}>{row.transitions[symbol] ? row.transitions[symbol]!.toString() : '-'}</td>
+                        ))}
                     </tr>
                 ))}
             </tbody>
