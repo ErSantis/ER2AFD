@@ -1,5 +1,6 @@
 import { TransitionRow } from "../types/TransitionTable.type";
-import { Automaton, State } from "./Automaton";
+import { Automaton } from "../models/Automaton";
+import { State } from "../models/State";
 
 
 export const generateTable = (automaton: Automaton): { transitions: TransitionRow[], symbols: string[] } => {
