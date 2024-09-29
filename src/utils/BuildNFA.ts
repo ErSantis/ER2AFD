@@ -1,9 +1,10 @@
-import { createBase, kleenePlus, kleeneStar, union, concatenate, optional } from './Thompson'
+import { createBase, kleenePlus, kleeneStar, union, concatenate, optional } from './Thompson';
 import { Automaton } from './Automaton';
 
-export function buildNFAFromRegex(regex: string): Automaton {
+export function buildNFAFromRegex(regex: string): { automaton: Automaton, alphabet: Set<string> } {
   const stack: Automaton[] = [];
   const operators: string[] = [];
+  const alphabet = new Set<string>(); // Almacenar los símbolos que forman parte del alfabeto de la ER
 
   // Función para procesar un símbolo y aplicarle un operador unario si es necesario (*, +, ?)
   const applyUnaryOperator = (automaton: Automaton, nextChar?: string | undefined): Automaton => {
@@ -62,7 +63,7 @@ export function buildNFAFromRegex(regex: string): Automaton {
       if (char === '(') {
         // Extraer subexpresión dentro de los paréntesis
         const [subexpression, newIndex] = extractSubexpression(i);
-        let subAutomaton = buildNFAFromRegex(subexpression);
+        let subAutomaton = buildNFAFromRegex(subexpression).automaton;
 
         // Aplicar un operador unario si está presente después de la subexpresión
         const nextChar = regex[newIndex + 1];
@@ -81,10 +82,11 @@ export function buildNFAFromRegex(regex: string): Automaton {
           rightAutomaton = concatenate(rightAutomaton, subAutomaton);
         }
       }
-      // Procesar caracteres normales (a-z, 0-9)
-      else if (/[a-z0-9]/i.test(char)) {
+      // Procesar caracteres normales (a-z, 0-9, &, etc.)
+      else if (!['|', '*', '+', '?', '(', ')'].includes(char)) {
         const nextChar = regex[i + 1];
         let currentAutomaton = createBase(char);
+        alphabet.add(char); // Añadir el símbolo al alfabeto
 
         // Avanzar el índice si hay un operador unario
         if (nextChar === '*' || nextChar === '+' || nextChar === '?') {
@@ -115,10 +117,11 @@ export function buildNFAFromRegex(regex: string): Automaton {
   for (let i = 0; i < regex.length; i++) {
     const char = regex[i];
 
-    // Si el carácter es parte del alfabeto (a-z, A-Z, 0-9, etc.)
-    if (/[a-z0-9]/i.test(char)) {
+    // Si el carácter es parte del alfabeto (no es operador especial)
+    if (!['|', '*', '+', '?', '(', ')'].includes(char)) {
       const nextChar = regex[i + 1];
       let currentAutomaton = createBase(char);
+      alphabet.add(char); // Añadir el símbolo al alfabeto
 
       // Avanzar el índice si hay un operador unario
       if (nextChar === '*' || nextChar === '+' || nextChar === '?') {
@@ -150,7 +153,7 @@ export function buildNFAFromRegex(regex: string): Automaton {
       i = newIndex; // Avanzar el índice al final del paréntesis cerrado
 
       // Llamar recursivamente a esta función con la subexpresión extraída
-      let subAutomaton = buildNFAFromRegex(subexpression);
+      let subAutomaton = buildNFAFromRegex(subexpression).automaton;
 
       // Aplicar un operador unario si está presente después del paréntesis
       const nextChar = regex[i + 1];
@@ -177,6 +180,6 @@ export function buildNFAFromRegex(regex: string): Automaton {
   // Obtener el autómata final de la pila
   const finalAutomaton = stack.pop()!;
 
-  // Retornar el autómata final
-  return finalAutomaton;
+  // Retornar el autómata final junto con el alfabeto
+  return { automaton: finalAutomaton, alphabet };
 }
