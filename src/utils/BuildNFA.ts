@@ -1,5 +1,5 @@
-import { createBase, kleenePlus, kleeneStar, union, concatenate, optional } from './Thompson';
-import { Automaton } from './Automaton';
+import { createBase, kleenePlus, kleeneStar, union, concatenate, optional } from '../models/Thompson';
+import { Automaton } from '../models/Automaton';
 
 const alphabet = new Set<string>(); // Almacenar los símbolos que forman parte del alfabeto de la ER
 export function buildNFAFromRegex(regex: string): { automaton: Automaton, alphabet: Set<string> } {

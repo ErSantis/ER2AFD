@@ -1,5 +1,5 @@
-import { Automaton, State } from "./Automaton";
-
+import { Automaton } from "../models/Automaton";
+import { State } from "../models/State";
 // Convierte el autómata en un formato DOT que puede ser visualizado por viz.js
 export function visualizeNFA(automaton: Automaton): string {
     const visited = new Set<State>();
