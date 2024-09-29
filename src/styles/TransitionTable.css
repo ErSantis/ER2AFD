@@ -1,0 +1,38 @@
+/* TransitionTable.css */
+
+/* Estilo para la tabla de transiciones */
+.transition-table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    text-align: center;
+  }
+  
+  .transition-table th, .transition-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  .transition-table th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .transition-table tr {
+    background-color: white; /* Filas blancas */
+  }
+  
+  .transition-table tr:nth-child(even) {
+    background-color: white; /* Asegurar que las filas alternas también sean blancas */
+  }
+  
+  .transition-table tr:hover {
+    background-color: #f1f1f1; /* Color de fondo más claro al hacer hover */
+  }
+  
+  .transition-table td {
+    font-size: 1em;
+    color: #333;
+  }
+  
