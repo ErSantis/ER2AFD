@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { buildNFAFromRegex } from '../utils/BuildNFA';
 import AutomatonGraph from './AutomatonGraph';
+import TransitionTable from './TransitionTable';
 import { Automaton } from '../utils/Automaton';
 
 const App: React.FC = () => {
-  const [regex, setRegex] = useState<string>(''); // Expresión regular ingresada por el usuario
+  const [regex, setRegex] = useState<string>('');
   const [automaton, setAutomaton] = useState<Automaton | null>(null);
 
   const handleBuildNFA = () => {
-    const nfa = buildNFAFromRegex(regex); // Construir el autómata usando la función de Thompson
-    setAutomaton(nfa); // Actualizar el autómata
+    const nfa = buildNFAFromRegex(regex);
+    setAutomaton(nfa);
   };
 
   return (
@@ -25,8 +26,11 @@ const App: React.FC = () => {
         <button onClick={handleBuildNFA}>Build NFA</button>
       </div>
 
-      {/* Renderizar el gráfico del autómata si existe */}
+      {/* Renderiza el gráfico del autómata */}
       {automaton && <AutomatonGraph automaton={automaton} />}
+
+      {/* Renderiza la tabla de transiciones */}
+      {automaton && <TransitionTable automaton={automaton} />}
     </div>
   );
 };
