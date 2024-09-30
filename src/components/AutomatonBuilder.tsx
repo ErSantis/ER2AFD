@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { buildNFAFromRegex } from '../utils/BuildNFA';
 import AutomatonGraph from './AutomatonGraph';
-import { Automaton } from '../utils/Automaton';
 import TransitionTable from './TransitionTable';
+import { Automaton } from '../models/Automaton';
 
 const App: React.FC = () => {
   const [regex, setRegex] = useState<string>(''); // Expresión regular ingresada por el usuario
