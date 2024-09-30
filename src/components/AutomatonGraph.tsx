@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
 import { visualizeNFA } from '../utils/AutomatonToDot'
-import { Automaton } from '../utils/Automaton';
+import { Automaton } from '../models/Automaton';
 
 type AutomatonGraphProps = {
   automaton: Automaton;
