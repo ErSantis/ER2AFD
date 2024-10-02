@@ -21,7 +21,7 @@ const DFATab: React.FC<DFATabProps> = ({ dfaTransitions, symbols, estadosFinales
       <AutomatonGraph dot={dfaToDot(Array.from(dfaTransitions.entries()), symbols, estadosFinales, estadoInicial)} />
 
       {/* Renderizar la tabla de transiciones utilizando el nuevo componente */}
-      <DFATransitionTable dfaTransitions={dfaTransitions} symbols={symbols} />
+      <DFATransitionTable dfaTransitions={dfaTransitions} symbols={symbols} estadosFinales={estadosFinales} estadoInicial={estadoInicial}/>
 
       {/* Renderiza la tabla de estados del AFD y su equivalencia en estados del AFN */}
       <AFNToDFAStateMap conjuntoAFNMap={conjuntoAFNMap} />
