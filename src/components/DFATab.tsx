@@ -5,7 +5,10 @@ import DFATransitionTable from './DFATransitionTable';
 import AFNToDFAStateMap from './DFASubsetsTable';
 import { DFATabProps } from '../types/DFATab.type';
 
-const DFATab: React.FC<DFATabProps> = ({ dfaTransitions, symbols, estadosFinales, estadoInicial, conjuntoAFNMap }) => {
+const DFATab: React.FC<DFATabProps> = ({ dfaTransitions, symbols, estadosFinales, estadoInicial, conjuntoAFNMap, estadoSignificativos }) => {
+  //Ver en estados significativos que letra tiene el mismo conjunto de estados y eliminar la segunda aparicion
+  
+  
   return (
     <div>
       {/* Renderizar el gráfico del AFD */}

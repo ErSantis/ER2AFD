@@ -6,5 +6,6 @@ export interface DFATabProps {
     estadosFinales: Set<string>;
     estadoInicial: string;
     conjuntoAFNMap:  Map<string, Set<State>>
+    estadoSignificativos?:  Map<string, Set<State>>
   }
   

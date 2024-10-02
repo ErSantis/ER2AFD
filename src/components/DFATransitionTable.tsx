@@ -1,7 +1,7 @@
 import React from 'react';
 import { DFATransitionTableProps } from '../types/DFATransitionTable.type';
 
-const DFATransitionTable: React.FC<DFATransitionTableProps> = ({ dfaTransitions, symbols, estadoInicial, estadosFinales }) => {
+const DFATransitionTable: React.FC<DFATransitionTableProps> = ({ dfaTransitions, symbols, estadoInicial, estadosFinales, estadosSignificados }) => {
   return (
     <div>
       <h2>Tabla de transiciones del DFA</h2>
