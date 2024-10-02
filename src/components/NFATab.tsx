@@ -1,13 +1,8 @@
 import React from 'react';
 import AutomatonGraph from './AutomatonGraph';
 import TransitionTable from './NFATransitionTable';
-import { Automaton } from '../models/Automaton';
 import { nfaToDot } from '../utils/AutomatonToDot';
-
-interface NFATabProps {
-  automaton: Automaton;
-  symbols: string[];
-}
+import { NFATabProps } from '../types/NFATab.type';
 
 const NFATab: React.FC<NFATabProps> = ({ automaton, symbols }) => {
   return (

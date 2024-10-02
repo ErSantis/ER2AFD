@@ -1,10 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import Viz from 'viz.js';
 import { Module, render } from 'viz.js/full.render.js';
-
-interface AutomatonGraphProps {
-    dot: string; // El string DOT que representa el autómata
-}
+import { AutomatonGraphProps } from '../types/AutomatonGraph.type';
 
 const AutomatonGraph: React.FC<AutomatonGraphProps> = ({ dot }) => {
     const graphRef = useRef<HTMLDivElement>(null);

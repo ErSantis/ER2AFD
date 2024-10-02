@@ -1,9 +1,5 @@
 import React from 'react';
-import { State } from '../models/State';
-
-interface AFNToDFAStateMapProps {
-  conjuntoAFNMap: Map<string, Set<State>>;
-}
+import { AFNToDFAStateMapProps } from '../types/DFASubsetsTable.type';
 
 const AFNToDFAStateMap: React.FC<AFNToDFAStateMapProps> = ({ conjuntoAFNMap }) => {
   return (

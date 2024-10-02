@@ -3,15 +3,7 @@ import AutomatonGraph from './AutomatonGraph';
 import { dfaToDot } from '../utils/AutomatonToDot';
 import DFATransitionTable from './DFATransitionTable';
 import AFNToDFAStateMap from './DFASubsetsTable';
-import { State } from '../models/State';
-
-interface DFATabProps {
-  dfaTransitions: Map<string, Map<string, string>>;
-  symbols: string[];
-  estadosFinales: Set<string>;
-  estadoInicial: string;
-  conjuntoAFNMap:  Map<string, Set<State>>
-}
+import { DFATabProps } from '../types/DFATab.type';
 
 const DFATab: React.FC<DFATabProps> = ({ dfaTransitions, symbols, estadosFinales, estadoInicial, conjuntoAFNMap }) => {
   return (

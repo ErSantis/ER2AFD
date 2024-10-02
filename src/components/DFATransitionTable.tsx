@@ -1,11 +1,5 @@
 import React from 'react';
-
-interface DFATransitionTableProps {
-  dfaTransitions: Map<string, Map<string, string>>;
-  symbols: string[];
-  estadoInicial: string;
-  estadosFinales: Set<string>;
-}
+import { DFATransitionTableProps } from '../types/DFATransitionTable.type';
 
 const DFATransitionTable: React.FC<DFATransitionTableProps> = ({ dfaTransitions, symbols, estadoInicial, estadosFinales }) => {
   return (
