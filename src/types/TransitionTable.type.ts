@@ -1,4 +1,4 @@
-import { Automaton } from "../utils/Automaton";
+import { Automaton } from "../models/Automaton";
 
 export interface TransitionTableProps {
     automaton: Automaton;
