@@ -47,6 +47,9 @@ export function buildDFAFromNFA(
                         estadosSignificativos.add(state);
                     }
                 });
+                if (state.isAccepting) {
+                    estadosSignificativos.add(state);
+                }
             });
             estadosSignificativosMap.set(nuevaLetra, estadosSignificativos);
 
@@ -58,6 +61,7 @@ export function buildDFAFromNFA(
 
                 if (state.isAccepting) {
                     estadosFinales.add(nuevaLetra);
+                    estadosSignificativosMap.set(nuevaLetra, estadosSignificativos);
                     break;
                 }
             }
