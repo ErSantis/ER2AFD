@@ -1,6 +1,6 @@
 import React from 'react';
 import AutomatonGraph from './AutomatonGraph';
-import TransitionTable from './TransitionTable';
+import TransitionTable from './NFATransitionTable';
 import { Automaton } from '../models/Automaton';
 import { nfaToDot } from '../utils/AutomatonToDot';
 

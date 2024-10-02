@@ -25,9 +25,12 @@ export function nfaToDot(automaton: Automaton): string {
         // Obtener el id del estado actual
         const currentStateId = stateMap.get(state) as number;
 
+        //Asignar el id de la etiqueta al id del estado
+        state.id = currentStateId;
+
         // Marcar el estado como de aceptación si es necesario
         if (state.isAccepting) {
-            dot += `  ${currentStateId} [shape=doublecircle];\n`;
+            dot += `  ${state.id} [shape=doublecircle];\n`;
         }
 
         // Agregar las transiciones al DOT
@@ -48,12 +51,25 @@ export function nfaToDot(automaton: Automaton): string {
     return dot;
 }
 
-export function dfaToDot(transitionTable: [string, Map<string, string>][], alphabet: string[]): string {
+export function dfaToDot(
+    transitionTable: [string, Map<string, string>][], 
+    alphabet: string[], 
+    estadosFinales: Set<string>, 
+    estadoInicial: string
+): string {
     let dot = 'digraph DFA {\n  rankdir=LR;\n  node [shape=circle];\n';
+
+    // Marcar el estado inicial con una flecha que lo apunte
+    dot += `  start [shape=point];\n  start -> ${estadoInicial};\n`;
 
     transitionTable.forEach(([state, transitions]) => {
         // Marcar el estado actual
         dot += `  ${state} [label="${state}"];\n`;
+
+        // Si el estado actual es un estado de aceptación, marcarlo como doublecircle
+        if (estadosFinales.has(state)) {
+            dot += `  ${state} [shape=doublecircle];\n`;
+        }
 
         // Recorrer las transiciones para cada símbolo en el alfabeto
         alphabet.forEach((symbol) => {
@@ -67,4 +83,3 @@ export function dfaToDot(transitionTable: [string, Map<string, string>][], alpha
     dot += '}';
     return dot;
 }
-

@@ -4,10 +4,21 @@ import { State } from '../models/State';
 import { mueve } from './mueve';
 
 // Función para convertir un AFN a AFD utilizando el método de subconjuntos y etiquetando los estados con letras
-export function buildDFAFromNFA(afn: Automaton, symbols: string[]): Map<string, Map<string, string>> {
+export function buildDFAFromNFA(
+    afn: Automaton,
+    symbols: string[]
+): { 
+    transicionesAFD: Map<string, Map<string, string>>, 
+    estadosFinales: Set<string>, 
+    estadoInicial: string,
+    conjuntoAFNMap: Map<string, Set<State>> // Mapeo del subconjunto de estados AFN
+} {
+
     // Inicialización
     const estadosD: Set<Set<State>> = new Set();  // Conjunto de estados del AFD
     const transicionesAFD = new Map<string, Map<string, string>>(); // Tabla de transiciones del AFD
+    const estadosFinales = new Set<string>(); // Conjunto de estados de aceptación del DFA
+    const conjuntoAFNMap = new Map<string, Set<State>>(); // Mapa del subconjunto de estados AFN
     const noMarcados: Set<State>[] = []; // Lista de estados no marcados
     const cerraduraInicial = cerraduraE(afn.startState);  // Cerradura épsilon del estado inicial
 
@@ -22,13 +33,26 @@ export function buildDFAFromNFA(afn: Automaton, symbols: string[]): Map<string, 
     const generarNombreConjunto = (conjunto: Set<State>): string => {
         const nombreConjunto = obtenerNombreConjunto(conjunto); // Nombre basado en IDs numéricos
         if (!estadoLetraMap.has(nombreConjunto)) {
-            estadoLetraMap.set(nombreConjunto, obtenerSiguienteLetra());
+            const nuevaLetra = obtenerSiguienteLetra();
+            estadoLetraMap.set(nombreConjunto, nuevaLetra);
+            conjuntoAFNMap.set(nuevaLetra, conjunto); // Asociar la letra al conjunto
+
+            // Verificar si este conjunto contiene un estado de aceptación
+            for (const state of conjunto) {
+                if (state.isAccepting) {
+                    estadosFinales.add(nuevaLetra);
+                    break;
+                }
+            }
         }
         return estadoLetraMap.get(nombreConjunto)!; // Retorna la letra asociada al conjunto
     };
 
     estadosD.add(cerraduraInicial); // Añadir la cerradura inicial a estadosD
     noMarcados.push(cerraduraInicial); // Marcar la cerradura inicial como no marcada
+
+    // Determinar el estado inicial del DFA
+    const estadoInicial = generarNombreConjunto(cerraduraInicial);
 
     // Mientras haya un conjunto de estados no marcado
     while (noMarcados.length > 0) {
@@ -71,7 +95,12 @@ export function buildDFAFromNFA(afn: Automaton, symbols: string[]): Map<string, 
         }
     }
 
-    return transicionesAFD;
+    return { 
+        transicionesAFD, 
+        estadosFinales, 
+        estadoInicial, 
+        conjuntoAFNMap // Devolver también el mapeo de subconjuntos de AFN
+    };
 }
 
 // Función auxiliar para generar un nombre para un conjunto de estados

@@ -2,7 +2,7 @@ import { createBase, kleenePlus, kleeneStar, union, concatenate, optional } from
 import { Automaton } from '../models/Automaton';
 
 const alphabet = new Set<string>(); // Almacenar los símbolos que forman parte del alfabeto de la ER
-export function buildNFAFromRegex(regex: string): { automaton: Automaton, alphabet: Set<string> } {
+export function buildNFAFromRegex(regex: string): Automaton  {
   const stack: Automaton[] = [];
   const operators: string[] = [];
 
@@ -63,7 +63,7 @@ export function buildNFAFromRegex(regex: string): { automaton: Automaton, alphab
       if (char === '(') {
         // Extraer subexpresión dentro de los paréntesis
         const [subexpression, newIndex] = extractSubexpression(i);
-        let subAutomaton = buildNFAFromRegex(subexpression).automaton;
+        let subAutomaton = buildNFAFromRegex(subexpression)
 
         // Aplicar un operador unario si está presente después de la subexpresión
         const nextChar = regex[newIndex + 1];
@@ -153,7 +153,7 @@ export function buildNFAFromRegex(regex: string): { automaton: Automaton, alphab
       i = newIndex; // Avanzar el índice al final del paréntesis cerrado
 
       // Llamar recursivamente a esta función con la subexpresión extraída
-      let subAutomaton = buildNFAFromRegex(subexpression).automaton;
+      let subAutomaton = buildNFAFromRegex(subexpression)
 
       // Aplicar un operador unario si está presente después del paréntesis
       const nextChar = regex[i + 1];
@@ -181,5 +181,5 @@ export function buildNFAFromRegex(regex: string): { automaton: Automaton, alphab
   const finalAutomaton = stack.pop()!;
 
   // Retornar el autómata final junto con el alfabeto
-  return { automaton: finalAutomaton, alphabet };
+  return finalAutomaton;
 }
