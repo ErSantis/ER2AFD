@@ -32,13 +32,17 @@ const App: React.FC = () => {
     setSymbols([])
     setNFA(null)
     setDFATransitions(null)
+    setEstadoLetra(null)
+    setEstadosFinales(null)
+    setEstadoInicial(null)
+
 
     const symbols = extractSymbols(regex);
     setSymbols(extractSymbols(regex)); // Extraer los símbolos del alfabeto
 
     const nfa = buildNFAFromRegex(regex); // Construcción del AFN
     setNFA(nfa); // Actualizar el AFN generado
-    console.log(nfa);
+
 
     // Convertir el AFN a AFD usando el método de subconjuntos
     const dfaTransitions = buildDFAFromNFA(nfa, symbols).transicionesAFD;
