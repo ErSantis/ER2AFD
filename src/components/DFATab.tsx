@@ -1,41 +1,30 @@
 import React from 'react';
 import AutomatonGraph from './AutomatonGraph';
 import { dfaToDot } from '../utils/AutomatonToDot';
+import DFATransitionTable from './DFATransitionTable';
+import AFNToDFAStateMap from './DFASubsetsTable';
+import { State } from '../models/State';
 
 interface DFATabProps {
   dfaTransitions: Map<string, Map<string, string>>;
   symbols: string[];
+  estadosFinales: Set<string>;
+  estadoInicial: string;
+  conjuntoAFNMap:  Map<string, Set<State>>
 }
 
-const DFATab: React.FC<DFATabProps> = ({ dfaTransitions, symbols }) => {
+const DFATab: React.FC<DFATabProps> = ({ dfaTransitions, symbols, estadosFinales, estadoInicial, conjuntoAFNMap }) => {
   return (
     <div>
       {/* Renderizar el gráfico del AFD */}
       <h2>Automata Finito Determinista (DFA)</h2>
-      <AutomatonGraph dot={dfaToDot(Array.from(dfaTransitions.entries()), symbols)} />
+      <AutomatonGraph dot={dfaToDot(Array.from(dfaTransitions.entries()), symbols, estadosFinales, estadoInicial)} />
 
-      {/* Renderizar la tabla de transiciones del AFD */}
-      <h2>Tabla de transiciones del DFA</h2>
-      <table className="transition-table">
-        <thead>
-          <tr>
-            <th>Estado</th>
-            {symbols.map((symbol) => (
-              <th key={symbol}>{symbol}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from(dfaTransitions.entries()).map(([state, transitions]) => (
-            <tr key={state}>
-              <td>{state}</td>
-              {symbols.map((symbol) => (
-                <td key={symbol}>{transitions.get(symbol) || '-'}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {/* Renderizar la tabla de transiciones utilizando el nuevo componente */}
+      <DFATransitionTable dfaTransitions={dfaTransitions} symbols={symbols} />
+
+      {/* Renderiza la tabla de estados del AFD y su equivalencia en estados del AFN */}
+      <AFNToDFAStateMap conjuntoAFNMap={conjuntoAFNMap} />
     </div>
   );
 };
