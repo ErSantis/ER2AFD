@@ -3,9 +3,11 @@ import React from 'react';
 interface DFATransitionTableProps {
   dfaTransitions: Map<string, Map<string, string>>;
   symbols: string[];
+  estadoInicial: string;
+  estadosFinales: Set<string>;
 }
 
-const DFATransitionTable: React.FC<DFATransitionTableProps> = ({ dfaTransitions, symbols }) => {
+const DFATransitionTable: React.FC<DFATransitionTableProps> = ({ dfaTransitions, symbols, estadoInicial, estadosFinales }) => {
   return (
     <div>
       <h2>Tabla de transiciones del DFA</h2>
@@ -21,7 +23,11 @@ const DFATransitionTable: React.FC<DFATransitionTableProps> = ({ dfaTransitions,
         <tbody>
           {Array.from(dfaTransitions.entries()).map(([state, transitions]) => (
             <tr key={state}>
-              <td>{state}</td>
+              <td>
+                {state === estadoInicial && '→'}
+                {estadosFinales.has(state) && '*'}
+                {state}
+              </td>
               {symbols.map((symbol) => (
                 <td key={symbol}>{transitions.get(symbol) || '-'}</td>
               ))}
