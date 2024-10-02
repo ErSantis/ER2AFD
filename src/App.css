@@ -40,3 +40,23 @@
 .read-the-docs {
   color: #888;
 }
+
+.tabs {
+  margin-top: 20px;
+}
+
+.tabs button {
+  padding: 10px 20px;
+  border: none;
+  background-color: lightgray;
+  cursor: pointer;
+}
+
+.tabs button.active {
+  background-color: #2196F3;
+  color: white;
+}
+
+.tabs button:not(.active):hover {
+  background-color: #ddd;
+}
