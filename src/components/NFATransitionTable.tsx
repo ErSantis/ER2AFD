@@ -3,8 +3,6 @@ import '../styles/TransitionTable.css';
 import { TransitionTableProps } from '../types/TransitionTable.type';
 import { generateTable } from '../utils/generateTable';
 
-
-
 const TransitionTable: React.FC<TransitionTableProps> = ({ automaton }) => {
     const { transitions, symbols } = generateTable(automaton);
 
