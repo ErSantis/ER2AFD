@@ -7,11 +7,12 @@ import { mueve } from './mueve';
 export function buildDFAFromNFA(
     afn: Automaton,
     symbols: string[]
-): { 
-    transicionesAFD: Map<string, Map<string, string>>, 
-    estadosFinales: Set<string>, 
+): {
+    transicionesAFD: Map<string, Map<string, string>>,
+    estadosFinales: Set<string>,
     estadoInicial: string,
     conjuntoAFNMap: Map<string, Set<State>> // Mapeo del subconjunto de estados AFN
+    estadosSignificativosMap: Map<string, Set<State>> // Mapeo de estados significativos del AFN para cada estado del DFA
 } {
 
     // Inicialización
@@ -21,6 +22,7 @@ export function buildDFAFromNFA(
     const conjuntoAFNMap = new Map<string, Set<State>>(); // Mapa del subconjunto de estados AFN
     const noMarcados: Set<State>[] = []; // Lista de estados no marcados
     const cerraduraInicial = cerraduraE(afn.startState);  // Cerradura épsilon del estado inicial
+    const estadosSignificativosMap = new Map<string, Set<State>>(); // Mapa de estados significativos
 
     let letraCounter = 0; // Contador para asignar letras a los conjuntos de estados
     const estadoLetraMap = new Map<string, string>(); // Mapa para asociar conjuntos de estados con letras
@@ -37,8 +39,23 @@ export function buildDFAFromNFA(
             estadoLetraMap.set(nombreConjunto, nuevaLetra);
             conjuntoAFNMap.set(nuevaLetra, conjunto); // Asociar la letra al conjunto
 
+
+            const estadosSignificativos = new Set<State>();
+            conjunto.forEach(state => {
+                state.transitions.forEach(transition => {
+                    if (transition.symbol && transition.symbol !== '&') {
+                        estadosSignificativos.add(state);
+                    }
+                });
+            });
+            estadosSignificativosMap.set(nuevaLetra, estadosSignificativos);
+
+
+
             // Verificar si este conjunto contiene un estado de aceptación
             for (const state of conjunto) {
+
+
                 if (state.isAccepting) {
                     estadosFinales.add(nuevaLetra);
                     break;
@@ -95,11 +112,12 @@ export function buildDFAFromNFA(
         }
     }
 
-    return { 
-        transicionesAFD, 
-        estadosFinales, 
-        estadoInicial, 
-        conjuntoAFNMap // Devolver también el mapeo de subconjuntos de AFN
+    return {
+        transicionesAFD,
+        estadosFinales,
+        estadoInicial,
+        conjuntoAFNMap, // Devolver también el mapeo de subconjuntos de AFN
+        estadosSignificativosMap
     };
 }
 
