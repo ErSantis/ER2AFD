@@ -2,7 +2,7 @@ import React from 'react';
 import AutomatonGraph from './AutomatonGraph';
 import { dfaToDot } from '../utils/AutomatonToDot';
 import DFATransitionTable from './DFATransitionTable';
-import AFNToDFAStateMap from './DFASubsetsTable';
+import StateMap from './DFASubsetsTable';
 import { DFATabProps } from '../types/DFATab.type';
 
 const DFATab: React.FC<DFATabProps> = ({
@@ -11,6 +11,7 @@ const DFATab: React.FC<DFATabProps> = ({
   estadosFinales,
   estadoInicial,
   conjuntoAFNMap,
+  estadosSignifitivos,
   isMinimized,
   estadosIdenticos
 }) => {
@@ -41,8 +42,17 @@ const DFATab: React.FC<DFATabProps> = ({
       />
 
       {/* Renderiza la tabla de estados del AFD y su equivalencia en estados del AFN */}
-      <h2>{isMinimized ? "Estados significativos" : "Correspondencia de Conjuntos AFN a Estados DFA"}</h2>
-      <AFNToDFAStateMap conjuntoAFNMap={conjuntoAFNMap} />
+      {isMinimized ? (
+        <div>
+          <h2>Estados Significativos</h2>
+          <StateMap conjuntoAFNMap={estadosSignifitivos!} />
+        </div>
+      ) : (
+        <div>
+          <h2>Correspondencia de Conjuntos AFN a Estados DFA</h2>
+          <StateMap conjuntoAFNMap={conjuntoAFNMap!} />
+        </div>
+      )}
 
       {/* Mostrar la tabla de estados idénticos solo si el autómata está minimizado y hay estados idénticos */}
       {isMinimized && estadosIdenticos && (
