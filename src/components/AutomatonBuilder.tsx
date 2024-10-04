@@ -23,6 +23,7 @@ const AutomatonBuilder: React.FC = () => {
 
   // Resetea el automata antes de construir uno nuevo
   const resetAutomata = () => {
+
     setSymbols([]);
     setNFA(null);
     setuDFATransitions(new Map()); // Limpiar las transiciones uDFA
@@ -37,32 +38,26 @@ const AutomatonBuilder: React.FC = () => {
   // Construye el autómata
   const handleBuildAutomata = () => {
     resetAutomata(); // Limpiar los estados anteriores
+    setSymbols(extractSymbolsFromRegxex(regex)); // Extraer los símbolos del alfabeto
 
-    const newSymbols = extractSymbolsFromRegxex(regex);
-    setSymbols(newSymbols); // Extraer los símbolos del alfabeto
+    setNFA(buildNFAFromRegex(regex));
 
-    const newNFA = buildNFAFromRegex(regex); // Construir el NFA
-    setNFA(newNFA);
+    handleuDFA(nfa!, symbols)
 
-    if (newNFA) {
-      handleuDFA(newNFA, newSymbols); // Construir uDFA si NFA es válido
-    }
+    handlemDFA()
   };
 
-  // Construye el NFA
-  const handleNFA = () => {
-    const newNFA = buildNFAFromRegex(regex);
-    setNFA(newNFA);
-  };
 
   // Construye el uDFA a partir del NFA
   const handleuDFA = (nfa: Automaton, symbols: string[]) => {
     const { transicionesAFD, conjuntoAFNMap, estadosFinales, estadoInicial, estadosSignificativosMap } = buildDFAFromNFA(nfa, symbols);
+
     setuDFATransitions(transicionesAFD); // Guardar las transiciones originales del uDFA
     setEstadoLetra(conjuntoAFNMap);
     setEstadosFinales(estadosFinales);
     setEstadoInicial(estadoInicial);
     setEstadosSignificativos(estadosSignificativosMap);
+
   };
 
   // Construye el mDFA minimizando el uDFA
@@ -73,6 +68,7 @@ const AutomatonBuilder: React.FC = () => {
       setmDFATransitions(nuevasTransicionesAFD); // Guardar las transiciones minimizadas del mDFA
       setEstadosFinales(nuevosEstadosFinales);
       setEstadosIdenticos(gruposEquivalentes);
+
     }
   };
 
@@ -83,7 +79,8 @@ const AutomatonBuilder: React.FC = () => {
     } else if (activeTab === 'DFA' && nfa) {
       handlemDFA(); // Minimizar DFA al cambiar de pestaña
     }
-  }, [activeTab, nfa, symbols]);
+
+  }, [activeTab, nfa, regex]);
 
   return (
     <div>
@@ -95,7 +92,7 @@ const AutomatonBuilder: React.FC = () => {
           onChange={(e) => setRegex(e.target.value)}
           placeholder="Enter regular expression"
         />
-        <button onClick={handleBuildAutomata}>Build Automata</button>
+        <button onClick={() => { handleBuildAutomata(), setActiveTab('NFA') }}>Build Automata</button>
       </div>
 
       {/* Mostrar símbolos únicos */}
