@@ -1,68 +1,93 @@
-import React, { useState } from 'react';
-import { buildNFAFromRegex } from '../utils/BuildNFA'; // Construcción del AFN
-import { buildDFAFromNFA } from '../utils/BuildDFA'; // Conversión del AFN a AFD
-import NFATab from './NFATab'; // Componente para el NFA
-import DFATab from './DFATab'; // Componente para el DFA
+import React, { useEffect, useState } from 'react';
+import { buildNFAFromRegex } from '../utils/BuildNFA';
+import { buildDFAFromNFA } from '../utils/BuildDFA';
+import { buildmDFAFromuDFA } from '../utils/BuildmDFA';
+import NFATab from './NFATab';
+import DFATab from './DFATab';
 import { Automaton } from '../models/Automaton';
+import { extractSymbolsFromRegxex } from '../utils/extractSymbols';
 import { State } from '../models/State';
 
-const App: React.FC = () => {
+const AutomatonBuilder: React.FC = () => {
   const [regex, setRegex] = useState<string>(''); // Expresión regular ingresada por el usuario
   const [nfa, setNFA] = useState<Automaton | null>(null); // AFN generado
-  const [dfaTransitions, setDFATransitions] = useState<Map<string, Map<string, string>> | null>(null); // Tabla de transiciones del AFD
+  const [udfaTransitions, setuDFATransitions] = useState<Map<string, Map<string, string>> | null>(null); // Transiciones del uDFA (AFD no minimizado)
+  const [mdfaTransitions, setmDFATransitions] = useState<Map<string, Map<string, string>> | null>(null); // Transiciones del mDFA (AFD minimizado)
   const [symbols, setSymbols] = useState<string[]>([]); // Símbolos del alfabeto
-  const [activeTab, setActiveTab] = useState<'NFA' | 'DFA'>('NFA'); // Controla la pestaña activa
-  const [estadoLetra, setEstadoLetra] = useState<Map<string, Set<State>> | null>(null)
-  const [estadosFinales, setEstadosFinales] = useState<Set<string> | null>(null)
-  //ESTADO INICIAL
-  const [estadoInicial, setEstadoInicial] = useState<string | null>(null)
-  const extractSymbols = (regex: string): string[] => {
-    const alphabet = new Set<string>();
-    for (let i = 0; i < regex.length; i++) {
-      const char = regex[i];
-      if (char !== '(' && char !== ')' && char !== '|' && char !== '*' && char !== '+' && char !== '?') {
-        alphabet.add(char);
-      }
-    }
-    return Array.from(alphabet);
+  const [activeTab, setActiveTab] = useState<'NFA' | 'uDFA' | 'DFA'>('NFA'); // Controla la pestaña activa
+  const [estadoLetra, setEstadoLetra] = useState<Map<string, Set<State>> | null>(null);
+  const [estadosFinales, setEstadosFinales] = useState<Set<string> | null>(null);
+  const [estadoInicial, setEstadoInicial] = useState<string | null>(null);
+  const [estadosSignificativos, setEstadosSignificativos] = useState<Map<string, Set<State>> | null>(null);
+  const [estadosIdenticos, setEstadosIdenticos] = useState<Map<string, string[]> | null>(null);
+
+  // Resetea el automata antes de construir uno nuevo
+  const resetAutomata = () => {
+    setSymbols([]);
+    setNFA(null);
+    setuDFATransitions(new Map()); // Limpiar las transiciones uDFA
+    setmDFATransitions(new Map()); // Limpiar las transiciones mDFA
+    setEstadoLetra(new Map());
+    setEstadosFinales(new Set());
+    setEstadoInicial(null);
+    setEstadosSignificativos(new Map());
+    setEstadosIdenticos(new Map());
   };
 
+  // Construye el autómata
   const handleBuildAutomata = () => {
+    resetAutomata(); // Limpiar los estados anteriores
 
-    setSymbols([])
-    setNFA(null)
-    setDFATransitions(null)
-    setEstadoLetra(null)
-    setEstadosFinales(null)
-    setEstadoInicial(null)
+    const newSymbols = extractSymbolsFromRegxex(regex);
+    setSymbols(newSymbols); // Extraer los símbolos del alfabeto
 
+    const newNFA = buildNFAFromRegex(regex); // Construir el NFA
+    setNFA(newNFA);
 
-    const symbols = extractSymbols(regex);
-    setSymbols(extractSymbols(regex)); // Extraer los símbolos del alfabeto
-
-    const nfa = buildNFAFromRegex(regex); // Construcción del AFN
-    setNFA(nfa); // Actualizar el AFN generado
-
-
-    // Convertir el AFN a AFD usando el método de subconjuntos
-    const dfaTransitions = buildDFAFromNFA(nfa, symbols).transicionesAFD;
-    setDFATransitions(dfaTransitions); // Guardar la tabla de transiciones del AFD
-
-    const estadoLetra = buildDFAFromNFA(nfa, symbols).conjuntoAFNMap;
-    setEstadoLetra(estadoLetra)
-
-
-    const estadosFinales = buildDFAFromNFA(nfa, symbols).estadosFinales
-    setEstadosFinales(estadosFinales)
-
-    const estadoInicial = buildDFAFromNFA(nfa, symbols).estadoInicial
-    setEstadoInicial(estadoInicial)
-
+    if (newNFA) {
+      handleuDFA(newNFA, newSymbols); // Construir uDFA si NFA es válido
+    }
   };
+
+  // Construye el NFA
+  const handleNFA = () => {
+    const newNFA = buildNFAFromRegex(regex);
+    setNFA(newNFA);
+  };
+
+  // Construye el uDFA a partir del NFA
+  const handleuDFA = (nfa: Automaton, symbols: string[]) => {
+    const { transicionesAFD, conjuntoAFNMap, estadosFinales, estadoInicial, estadosSignificativosMap } = buildDFAFromNFA(nfa, symbols);
+    setuDFATransitions(transicionesAFD); // Guardar las transiciones originales del uDFA
+    setEstadoLetra(conjuntoAFNMap);
+    setEstadosFinales(estadosFinales);
+    setEstadoInicial(estadoInicial);
+    setEstadosSignificativos(estadosSignificativosMap);
+  };
+
+  // Construye el mDFA minimizando el uDFA
+  const handlemDFA = () => {
+    if (udfaTransitions && estadosSignificativos && estadosFinales) {
+      const { nuevasTransicionesAFD, nuevosEstadosFinales, gruposEquivalentes } = buildmDFAFromuDFA(udfaTransitions, estadosSignificativos, estadosFinales);
+
+      setmDFATransitions(nuevasTransicionesAFD); // Guardar las transiciones minimizadas del mDFA
+      setEstadosFinales(nuevosEstadosFinales);
+      setEstadosIdenticos(gruposEquivalentes);
+    }
+  };
+
+  // Lógica para cambiar entre pestañas y recalcular los autómatas
+  useEffect(() => {
+    if (activeTab === 'uDFA' && nfa) {
+      handleuDFA(nfa, symbols); // Recalcular el uDFA al cambiar a la pestaña
+    } else if (activeTab === 'DFA' && nfa) {
+      handlemDFA(); // Minimizar DFA al cambiar de pestaña
+    }
+  }, [activeTab, nfa, symbols]);
 
   return (
     <div>
-      <h1>Automata Finito No Determinista (NFA) y Automata Finito Determinista (DFA)</h1>
+      <h1>ER2mAFD</h1>
       <div>
         <input
           type="text"
@@ -73,7 +98,7 @@ const App: React.FC = () => {
         <button onClick={handleBuildAutomata}>Build Automata</button>
       </div>
 
-      {/*Mostrar simbolos unicos */}
+      {/* Mostrar símbolos únicos */}
       <div>
         {symbols.length > 0 && (
           <p>
@@ -82,13 +107,16 @@ const App: React.FC = () => {
         )}
       </div>
 
-      {/* Pestañas para alternar entre NFA y DFA */}
+      {/* Pestañas para alternar entre NFA, uDFA y DFA */}
       <div className="tabs">
         <button onClick={() => setActiveTab('NFA')} className={activeTab === 'NFA' ? 'active' : ''}>
           NFA
         </button>
+        <button onClick={() => setActiveTab('uDFA')} className={activeTab === 'uDFA' ? 'active' : ''}>
+          uDFA
+        </button>
         <button onClick={() => setActiveTab('DFA')} className={activeTab === 'DFA' ? 'active' : ''}>
-          DFA
+          mDFA
         </button>
       </div>
 
@@ -97,11 +125,30 @@ const App: React.FC = () => {
         <NFATab automaton={nfa} symbols={symbols} />
       )}
 
-      {activeTab === 'DFA' && dfaTransitions && estadosFinales && estadoLetra && (
-        <DFATab dfaTransitions={dfaTransitions} symbols={symbols} estadosFinales={estadosFinales} estadoInicial={estadoInicial || ''} conjuntoAFNMap={estadoLetra} />
+      {activeTab === 'uDFA' && udfaTransitions && estadosFinales && estadoLetra && (
+        <DFATab
+          dfaTransitions={udfaTransitions} // Renderizar las transiciones originales del uDFA
+          symbols={symbols}
+          estadosFinales={estadosFinales}
+          estadoInicial={estadoInicial || ''}
+          conjuntoAFNMap={estadoLetra}
+          isMinimized={false} // uDFA
+        />
+      )}
+
+      {activeTab === 'DFA' && mdfaTransitions && estadosFinales && estadosSignificativos && (
+        <DFATab
+          dfaTransitions={mdfaTransitions} // Renderizar las transiciones minimizadas del mDFA
+          symbols={symbols}
+          estadosFinales={estadosFinales}
+          estadoInicial={estadoInicial || ''}
+          conjuntoAFNMap={estadosSignificativos}
+          isMinimized={true} // mDFA
+          estadosIdenticos={estadosIdenticos!}
+        />
       )}
     </div>
   );
 };
 
-export default App;
+export default AutomatonBuilder;

@@ -4,7 +4,6 @@ import { AFNToDFAStateMapProps } from '../types/DFASubsetsTable.type';
 const AFNToDFAStateMap: React.FC<AFNToDFAStateMapProps> = ({ conjuntoAFNMap }) => {
   return (
     <div>
-      <h2>Correspondencia de Conjuntos AFN a Estados DFA</h2>
       <table className="transition-table">
         <thead>
           <tr>
