@@ -130,7 +130,7 @@ const AutomatonBuilder: React.FC = () => {
           dfaTransitions={udfaTransitions} // Renderizar las transiciones originales del uDFA
           symbols={symbols}
           estadosFinales={estadosFinales}
-          estadoInicial={estadoInicial || ''}
+          estadoInicial={estadoInicial!}
           conjuntoAFNMap={estadoLetra}
           isMinimized={false} // uDFA
         />
@@ -141,10 +141,10 @@ const AutomatonBuilder: React.FC = () => {
           dfaTransitions={mdfaTransitions} // Renderizar las transiciones minimizadas del mDFA
           symbols={symbols}
           estadosFinales={estadosFinales}
-          estadoInicial={estadoInicial || ''}
-          conjuntoAFNMap={estadosSignificativos}
-          isMinimized={true} // mDFA
+          estadoInicial={estadoInicial!}
+          estadosSignifitivos={estadosSignificativos}
           estadosIdenticos={estadosIdenticos!}
+          isMinimized={true} // mDFA
         />
       )}
     </div>
