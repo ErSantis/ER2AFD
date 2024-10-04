@@ -1,11 +1,11 @@
 import { State } from "../models/State";
 
 export function buildmDFAFromuDFA(
-    dfaTransitions: Map<string, Map<string, string>>, 
-    estadosSignificativosMap: Map<string, Set<State>>, 
+    dfaTransitions: Map<string, Map<string, string>>,
+    estadosSignificativosMap: Map<string, Set<State>>,
     estadosFinales: Set<string>
 ): { nuevasTransicionesAFD: Map<string, Map<string, string>>, nuevosEstadosFinales: Set<string> } {
-    
+
     // Mapa inverso para agrupar los estados del DFA que tienen el mismo conjunto de estados significativos
     const agrupamientoEstados: Map<string, string[]> = new Map(); // { conjuntoSignificativo: [estadosDelDFA] }
 
@@ -74,6 +74,6 @@ export function buildmDFAFromuDFA(
             }
         });
     });
-
+    console.log(nuevasTransicionesAFD)
     return { nuevasTransicionesAFD, nuevosEstadosFinales };
 }

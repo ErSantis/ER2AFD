@@ -13,22 +13,13 @@ const DFATab: React.FC<DFATabProps> = ({
   conjuntoAFNMap,
   isMinimized,
 }) => {
-  const [dot, setDot] = useState<string>(''); // Estado para el string DOT
-
-  // Regenerar la cadena DOT cada vez que cambien las transiciones, símbolos o estados
-  useEffect(() => {
-    if (dfaTransitions && symbols.length > 0) {
-      const dotRepresentation = dfaToDot(Array.from(dfaTransitions.entries()), symbols, estadosFinales, estadoInicial);
-      setDot(dotRepresentation); // Actualizamos el estado de DOT
-    }
-  }, [dfaTransitions, symbols, estadosFinales, estadoInicial]); // Aseguramos que estas dependencias están observadas
 
   return (
     <div>
       <h2>{isMinimized ? 'Automata Finito Determinista Minimizado (mDFA)' : 'Automata Finito Determinista (DFA)'}</h2>
 
       {/* Renderizar el gráfico del AFD */}
-      <AutomatonGraph dot={dot} />
+      <AutomatonGraph dot={dfaToDot(Array.from(dfaTransitions.entries()), symbols, estadosFinales, estadoInicial)} />
 
       {/* Renderizar la tabla de transiciones utilizando el nuevo componente */}
       <DFATransitionTable
