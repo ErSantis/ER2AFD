@@ -7,4 +7,5 @@ export interface DFATabProps {
   estadoInicial: string;
   conjuntoAFNMap: Map<string, Set<State>>;
   isMinimized: boolean;  // Nueva prop
+  estadosIdenticos? :  Map<string, string[]>
 }
