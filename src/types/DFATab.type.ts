@@ -9,4 +9,5 @@ export interface DFATabProps {
   estadosSignifitivos? : Map<string, Set<State>>
   isMinimized: boolean;  // Nueva prop
   estadosIdenticos? :  Map<string, string[]>
+  cadena: string;
 }

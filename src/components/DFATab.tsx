@@ -4,6 +4,8 @@ import { dfaToDot } from '../utils/AutomatonToDot';
 import DFATransitionTable from './DFATransitionTable';
 import StateMap from './DFASubsetsTable';
 import { DFATabProps } from '../types/DFATab.type';
+import { recorrerDFA } from '../utils/recorrerDFA';
+import DynamicAutomaton from './DynamicAutomaton';
 
 const DFATab: React.FC<DFATabProps> = ({
   dfaTransitions,
@@ -13,7 +15,8 @@ const DFATab: React.FC<DFATabProps> = ({
   conjuntoAFNMap,
   estadosSignifitivos,
   isMinimized,
-  estadosIdenticos
+  estadosIdenticos,
+  cadena
 }) => {
 
   const formatIdenticalStates = (equivalentes: string[]) => {
@@ -25,13 +28,21 @@ const DFATab: React.FC<DFATabProps> = ({
     }
     return '';
   };
+  
 
   return (
     <div>
       <h2>{isMinimized ? 'Automata Finito Determinista Minimizado (mDFA)' : 'Automata Finito Determinista (DFA)'}</h2>
 
       {/* Renderizar el gráfico del AFD */}
-      <AutomatonGraph dot={dfaToDot(Array.from(dfaTransitions.entries()), symbols, estadosFinales, estadoInicial)} />
+      <DynamicAutomaton
+        dfaTransitions={dfaTransitions}
+        symbols={symbols}
+        estadosFinales={estadosFinales}
+        estadoInicial={estadoInicial}
+        cadena={cadena}
+      />
+
 
       {/* Renderizar la tabla de transiciones utilizando el nuevo componente */}
       <DFATransitionTable

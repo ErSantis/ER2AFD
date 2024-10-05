@@ -3,7 +3,7 @@ import { Automaton } from "../models/Automaton";
 import { State } from "../models/State";
 
 
-export const generateTable = (automaton: Automaton): { transitions: TransitionRow[], symbols: string[] } => {
+export const    generateTable = (automaton: Automaton): { transitions: TransitionRow[], symbols: string[] } => {
     const transitions: TransitionRow[] = [];
     const visited = new Set<State>();
     const queue: State[] = [automaton.startState];
