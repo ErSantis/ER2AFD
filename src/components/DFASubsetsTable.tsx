@@ -1,7 +1,7 @@
 import React from 'react';
-import { AFNToDFAStateMapProps } from '../types/DFASubsetsTable.type';
+import { StateMapProps } from '../types/DFASubsetsTable.type';
 
-const StateMap: React.FC<AFNToDFAStateMapProps> = ({ conjuntoAFNMap }) => {
+const StateMap: React.FC<StateMapProps> = ({ StateMap }) => {
   return (
     <div>
       <table className="transition-table">
@@ -12,7 +12,7 @@ const StateMap: React.FC<AFNToDFAStateMapProps> = ({ conjuntoAFNMap }) => {
           </tr>
         </thead>
         <tbody>
-          {Array.from(conjuntoAFNMap.entries()).map(([letra, conjunto]) => (
+          {Array.from(StateMap.entries()).map(([letra, conjunto]) => (
             <tr key={letra}>
               <td>{letra}</td>
               <td>

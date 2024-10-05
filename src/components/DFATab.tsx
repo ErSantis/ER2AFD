@@ -1,11 +1,9 @@
 import React from 'react';
-import AutomatonGraph from './AutomatonGraph';
-import { dfaToDot } from '../utils/AutomatonToDot';
 import DFATransitionTable from './DFATransitionTable';
 import StateMap from './DFASubsetsTable';
 import { DFATabProps } from '../types/DFATab.type';
-import { recorrerDFA } from '../utils/recorrerDFA';
 import DynamicAutomaton from './DynamicAutomaton';
+import { formatIdenticalStates } from '../utils/formatIdenticalStates';
 
 const DFATab: React.FC<DFATabProps> = ({
   dfaTransitions,
@@ -19,30 +17,19 @@ const DFATab: React.FC<DFATabProps> = ({
   cadena
 }) => {
 
-  const formatIdenticalStates = (equivalentes: string[]) => {
-    if (equivalentes.length === 2) {
-      return `${equivalentes[0]} y ${equivalentes[1]} se identifican`;
-    } else if (equivalentes.length > 2) {
-      const lastState = equivalentes.pop();
-      return `${equivalentes.join(', ')} y ${lastState} se identifican`;
-    }
-    return '';
-  };
-
-
   return (
     <div>
       <h2>{isMinimized ? 'Automata Finito Determinista Minimizado (mDFA)' : 'Automata Finito Determinista (DFA)'}</h2>
 
       {/* Renderizar el gráfico del AFD */}
       <DynamicAutomaton
-
         dfaTransitions={dfaTransitions}
         symbols={symbols}
         estadosFinales={estadosFinales}
         estadoInicial={estadoInicial}
-        cadena={cadena} automatonType={'DFA'} />
-
+        cadena={cadena}
+        automatonType={'DFA'}
+      />
 
       {/* Renderizar la tabla de transiciones utilizando el nuevo componente */}
       <DFATransitionTable
@@ -56,12 +43,12 @@ const DFATab: React.FC<DFATabProps> = ({
       {isMinimized ? (
         <div>
           <h2>Estados Significativos</h2>
-          <StateMap conjuntoAFNMap={estadosSignifitivos!} />
+          <StateMap StateMap={estadosSignifitivos!} />
         </div>
       ) : (
         <div>
           <h2>Correspondencia de Conjuntos AFN a Estados DFA</h2>
-          <StateMap conjuntoAFNMap={conjuntoAFNMap!} />
+          <StateMap StateMap={conjuntoAFNMap!} />
         </div>
       )}
 
