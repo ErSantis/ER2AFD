@@ -37,6 +37,11 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
     };
 
     useEffect(() => {
+
+        if (cadena === '') {
+            return;
+        }
+        
         const estadoInicialCalculado = obtenerEstadoInicial();
         const estadosFinalesCalculados = obtenerEstadosFinales();  // Calculamos los estados finales en caso de que no los tengamos
 
