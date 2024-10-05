@@ -23,6 +23,8 @@ const AutomatonBuilder: React.FC = () => {
   const [estadosSignificativos, setEstadosSignificativos] = useState<Map<string, Set<State>> | null>(null);
   const [estadosIdenticos, setEstadosIdenticos] = useState<Map<string, string[]> | null>(null);
 
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false); // Estado para habilitar o deshabilitar el botón
+
   const [inputString, setInputString] = useState(''); // Estado para controlar el input
   const [finalString, setFinalString] = useState(''); // Estado para guardar el valor cuando se presiona el botón
 
@@ -41,6 +43,23 @@ const AutomatonBuilder: React.FC = () => {
     setEstadosSignificativos(new Map());
     setEstadosIdenticos(new Map());
   };
+
+  // Valida el input para construir el automata
+  const validateRegex = (input: string) => {
+    const isValid = input.length % 2 === 0; // Lógica de validación
+    if (isValid) {
+        setIsButtonEnabled(true);
+    } else {
+        setIsButtonEnabled(false);
+    }
+  };
+  
+  // Manejar cambio del input de regex
+  const handleRegexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setRegex(value); // Actualiza el estado del regex
+    validateRegex(value); // Llama a la función de validación (vacía por ahora)
+    };
 
   // Construye el autómata
   const handleBuildAutomata = () => {
@@ -114,7 +133,12 @@ const AutomatonBuilder: React.FC = () => {
           onChange={(e) => setRegex(e.target.value)}
           placeholder="Enter regular expression"
         />
-        <button onClick={() => { handleBuildAutomata(), setActiveTab('NFA') }}>Build Automata</button>
+        <button
+          onClick={() => { handleBuildAutomata(), setActiveTab('NFA') }}
+          disabled={!isButtonEnabled} // Controla si el botón está habilitado o deshabilitad
+        >
+          Build Automata
+        </button>
         <input
           type="text"
           value={inputString}
