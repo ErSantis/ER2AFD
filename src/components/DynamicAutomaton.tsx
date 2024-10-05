@@ -18,8 +18,9 @@ const DynamicAutomaton: React.FC<{
     const [recorrido, setRecorrido] = useState<{ estadoActual: string, siguienteEstado: string, simbolo: string }[]>([]);
     const [currentStep, setCurrentStep] = useState<number>(0);
     const [estadoResaltado, setEstadoResaltado] = useState<string | null>(null);
-    const [transicionResaltada, setTransicionResaltada] = useState<{ estadoActual: string, siguienteEstado: string } | null>(null);
+    const [transicionResaltada, setTransicionResaltada] = useState<{ estadoActual: string, siguienteEstado: string, simbolo: string } | null>(null);
     const [estadoFinalAlcanzado, setEstadoFinalAlcanzado] = useState<string | null>(null);
+    const [resetColors, setResetColors] = useState<boolean>(false); // Estado para resetear los colores
 
     useEffect(() => {
         if (automatonType === 'DFA') {
@@ -32,57 +33,60 @@ const DynamicAutomaton: React.FC<{
         }
         setCurrentStep(0);
         setEstadoFinalAlcanzado(null);
+        setResetColors(false); // Reiniciamos los colores al empezar un nuevo recorrido
     }, [cadena, automaton, automatonType, estadoInicial, estadosFinales]);
 
     useEffect(() => {
         if (currentStep < recorrido.length) {
             const transicion = recorrido[currentStep];
-            console.log(transicion);
 
             // Resaltar el estado actual primero
             setEstadoResaltado(transicion.estadoActual);
             setTransicionResaltada(null); // Asegurarnos de que la transición aún no esté resaltada
 
             const estadoTimeoutId = setTimeout(() => {
-                // Después de 500 ms resaltar la transición correspondiente
-                setTransicionResaltada({ estadoActual: transicion.estadoActual, siguienteEstado: transicion.siguienteEstado });
+                // Resaltamos solo la transición actual después de 500 ms
+                setTransicionResaltada({
+                    estadoActual: transicion.estadoActual,
+                    siguienteEstado: transicion.siguienteEstado,
+                    simbolo: transicion.simbolo,  // Incluimos el símbolo en la transición resaltada
+                });
 
-                // Si estamos en el penúltimo paso y el siguiente estado es el estado final
-                if (currentStep === recorrido.length - 1 && estadosFinales && estadosFinales.has(transicion.siguienteEstado)) {
+                // Si estamos en el penúltimo paso y el siguiente estado es un estado final
+                if (currentStep === recorrido.length - 1 && estadosFinales!.has(transicion.siguienteEstado)) {
                     const estadoFinalTimeoutId = setTimeout(() => {
-                        // Limpiar la flecha y el penúltimo estado antes de resaltar el estado final
+                        // Limpiamos la flecha y el penúltimo estado antes de resaltar el estado final
                         setEstadoResaltado(null);
                         setTransicionResaltada(null);
-                        setEstadoFinalAlcanzado(transicion.siguienteEstado); // Resaltar el estado final después de la transición
+                        setEstadoFinalAlcanzado(transicion.siguienteEstado); // Resaltamos el estado final
 
-                        // Agregar un temporizador adicional para volver el estado final a su color original
                         const resetFinalTimeoutId = setTimeout(() => {
-                            setEstadoFinalAlcanzado(null); // Volver el estado final a su color original
-                        }, 1000); // Tiempo adicional para dejar el estado final resaltado antes de resetearlo
+                            setEstadoFinalAlcanzado(null); // Reseteamos el color del estado final después de un tiempo
+                        }, 1000); // Tiempo adicional para que el estado final se quede resaltado un momento
 
                         return () => clearTimeout(resetFinalTimeoutId);
-                    }, 500); // Retrasar el resaltado del estado final
+                    }, 500); // Espera antes de resaltar el estado final
 
                     return () => clearTimeout(estadoFinalTimeoutId);
                 }
 
-                // Avanzar al siguiente paso después de otro segundo
+                // Avanzamos al siguiente paso después de otro medio segundo
                 const transicionTimeoutId = setTimeout(() => {
                     setCurrentStep((prevStep) => prevStep + 1);
-                }, 500); // Avanzar después de 500 ms
+                }, 500);
 
                 return () => clearTimeout(transicionTimeoutId);
-            }, 500); // Esperar 500 ms para resaltar la transición
+            }, 500); // Esperamos 500 ms antes de resaltar la transición
 
             return () => clearTimeout(estadoTimeoutId);
         } else {
             setEstadoResaltado(null);
             setTransicionResaltada(null);
-            setEstadoFinalAlcanzado(null); // Resetear el estado final alcanzado
+            setEstadoFinalAlcanzado(null); // Resetear el estado final cuando se termina el recorrido
         }
     }, [currentStep, recorrido, estadosFinales]);
 
-    // Seleccionar el renderizado del autómata adecuado para NFA o DFA
+    // Generar el DOT dependiendo del tipo de autómata
     const dot = automatonType === 'DFA' ?
         dfaToDot(
             Array.from(dfaTransitions!.entries()),
@@ -90,17 +94,11 @@ const DynamicAutomaton: React.FC<{
             estadosFinales!,
             estadoInicial!,
             recorrido,
-            estadoResaltado,
-            transicionResaltada,
-            estadoFinalAlcanzado
+            resetColors ? null : estadoResaltado,  // Resetear colores si es necesario
+            resetColors ? null : transicionResaltada,
+            resetColors ? null : estadoFinalAlcanzado
         )
-        : nfaToDot(
-            automaton!,
-            recorrido,
-            estadoResaltado,
-            transicionResaltada,
-            estadoFinalAlcanzado
-        ); // Para NFA, usamos `nfaToDot`
+        : nfaToDot(automaton!, recorrido, estadoResaltado, transicionResaltada, estadoFinalAlcanzado);
 
     return <AutomatonGraph dot={dot} />;
 };

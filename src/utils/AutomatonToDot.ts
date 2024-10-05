@@ -79,51 +79,53 @@ export function nfaToDot(
 
 
 export function dfaToDot(
-    transitionTable: [string, Map<string, string>][], 
-    alphabet: string[], 
-    estadosFinales: Set<string>, 
-    estadoInicial: string, 
-    recorrido: { estadoActual: string, siguienteEstado: string, simbolo: string }[], 
-    estadoResaltado: string | null,
-    transicionResaltada: { estadoActual: string, siguienteEstado: string } | null,
-    estadoFinalAlcanzado: string | null
-  ): string {
-      let dot = 'digraph DFA {\n  rankdir=LR;\n  node [shape=circle];\n';
-  
-      // Marcar el estado inicial con una flecha que lo apunte
-      dot += `  start [shape=point];\n  start -> ${estadoInicial};\n`;
-  
-      transitionTable.forEach(([state, transitions]) => {
-          let estadoStyle = 'shape=circle';
-          let colorStyle = '';
-  
-          // Si el estado actual es un estado de aceptación
-          if (estadosFinales.has(state)) {
-              estadoStyle = 'shape=doublecircle';
+  transitionTable: [string, Map<string, string>][],
+  alphabet: string[],
+  estadosFinales: Set<string>,
+  estadoInicial: string,
+  recorrido: { estadoActual: string, siguienteEstado: string, simbolo: string }[],
+  estadoResaltado: string | null,
+  transicionResaltada: { estadoActual: string, siguienteEstado: string, simbolo: string } | null,
+  estadoFinalAlcanzado: string | null
+): string {
+  let dot = 'digraph DFA {\n  rankdir=LR;\n  node [shape=circle];\n';
+
+  // Marcar el estado inicial con una flecha que lo apunte
+  dot += `  start [shape=point];\n  start -> ${estadoInicial};\n`;
+
+  transitionTable.forEach(([state, transitions]) => {
+      let estadoStyle = 'shape=circle';
+      let colorStyle = '';
+
+      // Si el estado actual es un estado de aceptación
+      if (estadosFinales.has(state)) {
+          estadoStyle = 'shape=doublecircle';
+      }
+
+      // Si es el estado resaltado y final alcanzado, darle borde verde y relleno verde claro
+      if (estadoFinalAlcanzado === state) {
+          colorStyle = 'style=filled, fillcolor=green, color=green';
+      } else if (estadoResaltado === state) {
+          colorStyle = 'style=filled, fillcolor=yellow';
+      }
+
+      dot += `  ${state} [label="${state}", ${estadoStyle}, ${colorStyle}];\n`;
+
+      // Recorrer las transiciones para cada símbolo en el alfabeto
+      alphabet.forEach((symbol) => {
+          const targetState = transitions.get(symbol);
+          if (targetState) {
+              // Verificamos si esta es la transición resaltada basada en el símbolo también
+              const transicionColor = (transicionResaltada && transicionResaltada.estadoActual === state && transicionResaltada.siguienteEstado === targetState && transicionResaltada.simbolo === symbol)
+                  ? 'color=red, penwidth=2'
+                  : '';
+              dot += `  ${state} -> ${targetState} [label="${symbol}" ${transicionColor}];\n`;
           }
-  
-          // Si es el estado resaltado y final alcanzado, darle borde verde y relleno verde claro
-          if (estadoFinalAlcanzado === state) {
-              colorStyle = 'style=filled, fillcolor=green, color=green';
-          } else if (estadoResaltado === state) {
-              colorStyle = 'style=filled, fillcolor=yellow';
-          }
-  
-          dot += `  ${state} [label="${state}", ${estadoStyle}, ${colorStyle}];\n`;
-  
-          // Recorrer las transiciones para cada símbolo en el alfabeto
-          alphabet.forEach((symbol) => {
-              const targetState = transitions.get(symbol);
-              if (targetState) {
-                  const transicionColor = (transicionResaltada && transicionResaltada.estadoActual === state && transicionResaltada.siguienteEstado === targetState) 
-                                          ? 'color=red, penwidth=2' 
-                                          : '';
-                  dot += `  ${state} -> ${targetState} [label="${symbol}" ${transicionColor}];\n`;
-              }
-          });
       });
-  
-      dot += '}';
-      return dot;
-  }
+  });
+
+  dot += '}';
+  return dot;
+}
+
   
