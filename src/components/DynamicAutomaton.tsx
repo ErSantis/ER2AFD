@@ -13,6 +13,7 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
     const [transicionResaltada, setTransicionResaltada] = useState<{ estadoActual: string, siguienteEstado: string, simbolo: string } | null>(null);
     const [estadoFinalAlcanzado, setEstadoFinalAlcanzado] = useState<string | null>(null);
     const [resetColors, setResetColors] = useState<boolean>(false); // Estado para resetear los colores
+    const [esAceptado, setEsAceptado] = useState<boolean>(false); // Estado para controlar si la cadena fue aceptada
 
     // Obtener los estados finales desde el autómata si no se pasaron explícitamente
     const obtenerEstadosFinales = (): Set<string> => {
@@ -40,12 +41,14 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
         const estadosFinalesCalculados = obtenerEstadosFinales();  // Calculamos los estados finales en caso de que no los tengamos
 
         if (automatonType === 'DFA') {
-            const { recorrido } = recorrerDFA(cadena, dfaTransitions!, estadoInicialCalculado, estadosFinalesCalculados);
+            const { recorrido, esAceptado } = recorrerDFA(cadena, dfaTransitions!, estadoInicialCalculado, estadosFinalesCalculados);
             setRecorrido(recorrido);
+            setEsAceptado(esAceptado);
         } else {
             const table = generateTable(automaton!);
-            const { recorrido } = recorrerNFA(cadena, table.transitions, symbols, estadoInicialCalculado, estadosFinalesCalculados);
+            const { recorrido, esAceptado } = recorrerNFA(cadena, table.transitions, symbols, estadoInicialCalculado, estadosFinalesCalculados);
             setRecorrido(recorrido);
+            setEsAceptado(esAceptado);
         }
         setCurrentStep(0);
         setEstadoFinalAlcanzado(null);
@@ -53,8 +56,6 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
     }, [cadena, automaton, automatonType, estadoInicial, estadosFinales]);
 
     useEffect(() => {
-        const estadosFinalesCalculados = obtenerEstadosFinales();
-
         if (currentStep < recorrido.length) {
             const transicion = recorrido[currentStep];
 
@@ -70,8 +71,8 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
                     simbolo: transicion.simbolo,  // Incluimos el símbolo en la transición resaltada
                 });
 
-                // Si estamos en el penúltimo paso y el siguiente estado es un estado final
-                if (currentStep === recorrido.length - 1 && estadosFinalesCalculados.has(transicion.siguienteEstado)) {
+                // Si estamos en el penúltimo paso y la cadena es aceptada, resaltar el estado final
+                if (currentStep === recorrido.length - 1 && esAceptado) {
                     const estadoFinalTimeoutId = setTimeout(() => {
                         // Limpiamos la flecha y el penúltimo estado antes de resaltar el estado final
                         setEstadoResaltado(null);
@@ -114,9 +115,9 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
             recorrido,
             resetColors ? null : estadoResaltado,  // Resetear colores si es necesario
             resetColors ? null : transicionResaltada,
-            resetColors ? null : estadoFinalAlcanzado
+            esAceptado ? estadoFinalAlcanzado : null // Solo resaltamos el estado final si la cadena es aceptada
         )
-        : nfaToDot(automaton!, recorrido, estadoResaltado, transicionResaltada, estadoFinalAlcanzado);
+        : nfaToDot(automaton!, recorrido, estadoResaltado, transicionResaltada, esAceptado ? estadoFinalAlcanzado : null);
 
     return <AutomatonGraph dot={dot} />;
 };
