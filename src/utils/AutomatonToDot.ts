@@ -1,55 +1,82 @@
 import { Automaton } from "../models/Automaton";
 import { State } from "../models/State";
-// Convierte el autómata en un formato DOT que puede ser visualizado por viz.js
-export function nfaToDot(automaton: Automaton): string {
-    const visited = new Set<State>();
-    const queue: State[] = [automaton.startState];
-    let stateId = 0;
-    const stateMap = new Map<State, number>();
 
-    let dot = 'digraph NFA {\n  rankdir=LR;\n  node [shape=circle];\n'; // Inicializa el DOT
+// Convierte el autómata NFA en un formato DOT que puede ser visualizado por viz.js
+export function nfaToDot(
+  automaton: Automaton, 
+  recorrido: { estadoActual: string, siguienteEstado: string, simbolo: string }[], 
+  estadoResaltado: string | null, 
+  transicionResaltada: { estadoActual: string, siguienteEstado: string } | null,
+  estadoFinalAlcanzado: string | null
+): string {
+  const visited = new Set<State>();
+  const queue: State[] = [automaton.startState];
+  let stateId = 0;
+  const stateMap = new Map<State, number>();
 
-    // Asigna un id numérico al estado de inicio
-    const startStateId = stateId++;
-    stateMap.set(automaton.startState, startStateId);
+  let dot = 'digraph NFA {\n  rankdir=LR;\n  node [shape=circle];\n'; // Inicializa el DOT
 
-    // Agregar una flecha al estado de inicio
-    dot += `  start [shape=point];\n  start -> ${startStateId};\n`;
+  // Asigna un id numérico al estado de inicio
+  const startStateId = stateId++;
+  stateMap.set(automaton.startState, startStateId);
 
-    // Bucle para recorrer el autómata y agregar las transiciones
-    while (queue.length > 0) {
-        const state = queue.shift() as State;
-        if (visited.has(state)) continue;
-        visited.add(state);
+  // Agregar una flecha al estado de inicio
+  dot += `  start [shape=point];\n  start -> ${startStateId};\n`;
 
-        // Obtener el id del estado actual
-        const currentStateId = stateMap.get(state) as number;
+  // Bucle para recorrer el autómata y agregar las transiciones
+  while (queue.length > 0) {
+    const state = queue.shift() as State;
+    if (visited.has(state)) continue;
+    visited.add(state);
 
-        //Asignar el id de la etiqueta al id del estado
-        state.id = currentStateId;
+    // Obtener el id del estado actual
+    const currentStateId = stateMap.get(state) as number;
 
-        // Marcar el estado como de aceptación si es necesario
-        if (state.isAccepting) {
-            dot += `  ${state.id} [shape=doublecircle];\n`;
-        }
+    // Asignar el id de la etiqueta al id del estado
+    state.id = currentStateId;
 
-        // Agregar las transiciones al DOT
-        state.transitions.forEach(({ symbol, state: nextState }) => {
-            const nextStateId = stateMap.get(nextState) || stateId++;
-            stateMap.set(nextState, nextStateId);
+    // Marcar el estado como de aceptación si es necesario
+    let estadoStyle = 'shape=circle';
+    let colorStyle = '';
 
-            // Agregar la transición en formato DOT
-            dot += `  ${currentStateId} -> ${nextStateId} [label="${symbol || 'ε'}"];\n`;
-
-            if (!visited.has(nextState)) {
-                queue.push(nextState);
-            }
-        });
+    if (state.isAccepting) {
+      estadoStyle = 'shape=doublecircle';
     }
 
-    dot += '}'; // Cerrar el grafo DOT
-    return dot;
+    // Resaltar el estado si corresponde al estado resaltado actual
+    if (estadoFinalAlcanzado === currentStateId.toString()) {
+      colorStyle = 'style=filled, fillcolor=green, color=green';
+    } else if (estadoResaltado === currentStateId.toString()) {
+      colorStyle = 'style=filled, fillcolor=yellow';
+    }
+
+    dot += `  ${currentStateId} [label="${currentStateId}", ${estadoStyle}, ${colorStyle}];\n`;
+
+    // Recorrer las transiciones del estado actual
+    state.transitions.forEach(({ symbol, state: nextState }) => {
+      const nextStateId = stateMap.get(nextState) || stateId++;
+      stateMap.set(nextState, nextStateId);
+
+      let transicionColor = '';
+
+      // Resaltar la transición si es la resaltada actualmente
+      if (transicionResaltada && transicionResaltada.estadoActual === currentStateId.toString() && transicionResaltada.siguienteEstado === nextStateId.toString()) {
+        transicionColor = 'color=red, penwidth=2';
+      }
+
+      // Agregar la transición al DOT
+      dot += `  ${currentStateId} -> ${nextStateId} [label="${symbol || 'ε'}" ${transicionColor}];\n`;
+
+      if (!visited.has(nextState)) {
+        queue.push(nextState);
+      }
+    });
+  }
+
+  dot += '}'; // Cerrar el grafo DOT
+  return dot;
 }
+
 
 export function dfaToDot(
     transitionTable: [string, Map<string, string>][], 

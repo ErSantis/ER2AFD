@@ -28,7 +28,7 @@ const DFATab: React.FC<DFATabProps> = ({
     }
     return '';
   };
-  
+
 
   return (
     <div>
@@ -36,12 +36,12 @@ const DFATab: React.FC<DFATabProps> = ({
 
       {/* Renderizar el gráfico del AFD */}
       <DynamicAutomaton
+
         dfaTransitions={dfaTransitions}
         symbols={symbols}
         estadosFinales={estadosFinales}
         estadoInicial={estadoInicial}
-        cadena={cadena}
-      />
+        cadena={cadena} automatonType={'DFA'} />
 
 
       {/* Renderizar la tabla de transiciones utilizando el nuevo componente */}

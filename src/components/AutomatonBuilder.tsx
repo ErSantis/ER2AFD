@@ -146,7 +146,7 @@ const AutomatonBuilder: React.FC = () => {
 
       {/* Renderizar la pestaña correspondiente */}
       {activeTab === 'NFA' && nfa && (
-        <NFATab automaton={nfa} symbols={symbols} />
+        <NFATab automaton={nfa} symbols={symbols} cadena={finalString} />
       )}
 
       {activeTab === 'uDFA' && udfaTransitions && estadosFinales && estadoLetra && (
