@@ -1,22 +1,36 @@
 import { TransitionRow } from "../types/TransitionTable.type";
 
+interface Transicion {
+    estadoActual: string;
+    siguienteEstado: string;
+    simbolo: string;
+}
+
 export function recorrerNFA(
     cadena: string, 
     transitions: TransitionRow[], 
-    symbols: string[]
-): { recorrido: { estadoActual: string, siguienteEstado: string, simbolo: string }[] } {
-    
-    const recorrido: { estadoActual: string, siguienteEstado: string, simbolo: string }[] = [];
-    
+    symbols: string[], 
+    estadoInicial: string, 
+    estadosFinales: Set<string>
+): { recorrido: Transicion[], esAceptado: boolean } {
+
+    const recorrido: Transicion[] = [];
+    let esAceptado = false;
+
     // Pila para realizar el backtracking y manejar múltiples rutas
     const stack: { estadoActual: string, restanteCadena: string, visitados: Set<string> }[] = [];
 
-    // Iniciamos desde el estado 0
-    const estadoInicial = '0';
+    // Iniciamos desde el estado inicial
     stack.push({ estadoActual: estadoInicial, restanteCadena: cadena, visitados: new Set([estadoInicial]) });
 
     while (stack.length > 0) {
         const { estadoActual, restanteCadena, visitados } = stack.pop()!;
+
+        // Si hemos consumido toda la cadena, verificamos si estamos en un estado final
+        if (restanteCadena.length === 0 && estadosFinales.has(estadoActual)) {
+            esAceptado = true;
+            break; // Terminamos el recorrido si encontramos un camino aceptado
+        }
 
         // Buscar las transiciones correspondientes al estado actual
         const fila = transitions.find(row => row.state === Number(estadoActual));
@@ -31,7 +45,8 @@ export function recorrerNFA(
 
                 // Si la transición es una epsilon (&) o coincide con el símbolo actual, explorarla
                 if (simbolo === '&' || (restanteCadena.length > 0 && simbolo === restanteCadena[0])) {
-                    for (const siguienteEstado of estadosSiguientes!) {
+                    // Invertimos el orden de los estados siguientes antes de añadirlos a la pila
+                    for (const siguienteEstado of [...estadosSiguientes!].reverse()) {
                         const siguienteEstadoString = siguienteEstado.toString();
                         
                         // Evitar ciclos infinitos revisando si ya hemos visitado este estado
@@ -49,7 +64,7 @@ export function recorrerNFA(
                             // Si la transición fue por un símbolo (no epsilon), consumimos un símbolo de la cadena
                             const siguienteCadena = simbolo === '&' ? restanteCadena : restanteCadena.slice(1);
 
-                            // Guardamos todas las transiciones no exploradas para backtrack
+                            // Guardamos todas las transiciones no exploradas para backtrack en el orden invertido
                             transicionesBacktrack.push({
                                 estadoActual: siguienteEstadoString,
                                 siguienteEstado: siguienteEstadoString,
@@ -73,5 +88,5 @@ export function recorrerNFA(
         }
     }
 
-    return { recorrido };
+    return { recorrido, esAceptado };
 }

@@ -7,7 +7,7 @@ import DFATab from './DFATab';
 import { Automaton } from '../models/Automaton';
 import { extractSymbolsFromRegxex } from '../utils/extractSymbols';
 import { State } from '../models/State';
-import { recorrerDFA } from '../utils/recorrerDFA';
+
 
 const AutomatonBuilder: React.FC = () => {
   const [regex, setRegex] = useState<string>(''); // Expresión regular ingresada por el usuario
@@ -45,13 +45,16 @@ const AutomatonBuilder: React.FC = () => {
   // Construye el autómata
   const handleBuildAutomata = () => {
     resetAutomata(); // Limpiar los estados anteriores
+
     setSymbols(extractSymbolsFromRegxex(regex)); // Extraer los símbolos del alfabeto
 
-    setNFA(buildNFAFromRegex(regex));
+    setNFA(buildNFAFromRegex(regex)); //Contruir el NFA
 
-    handleuDFA(nfa!, symbols)
+    if (nfa) {
+      handleuDFA(nfa, symbols) // Construir el uDFA
+      handlemDFA() // Contruti el mDFA
+    }
 
-    handlemDFA()
   };
 
 
@@ -96,7 +99,6 @@ const AutomatonBuilder: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    // Asegúrate de reiniciar la animación y borrar el recorrido previo
     setFinalString(''); // Resetea la cadena final para asegurarte de que siempre haya un cambio de estado
     setTimeout(() => setFinalString(inputString), 0); // Establece la cadena final nuevamente con un pequeño retraso
   };
@@ -149,28 +151,28 @@ const AutomatonBuilder: React.FC = () => {
         <NFATab automaton={nfa} symbols={symbols} cadena={finalString} />
       )}
 
-      {activeTab === 'uDFA' && udfaTransitions && estadosFinales && estadoLetra && (
+      {activeTab === 'uDFA' && udfaTransitions && estadoInicial && estadosFinales && estadoLetra && (
         <DFATab
           dfaTransitions={udfaTransitions} // Renderizar las transiciones originales del uDFA
           symbols={symbols}
           estadosFinales={estadosFinales}
-          estadoInicial={estadoInicial!}
+          estadoInicial={estadoInicial}
           conjuntoAFNMap={estadoLetra}
-          isMinimized={false} // uDFA
           cadena={finalString}
+          isMinimized={false} // uDFA
         />
       )}
 
-      {activeTab === 'DFA' && mdfaTransitions && mdfestadosFinales && estadosSignificativos && (
+      {activeTab === 'DFA' && mdfaTransitions && mdfestadosFinales && estadosSignificativos && estadoInicial && estadosIdenticos && (
         <DFATab
           dfaTransitions={mdfaTransitions} // Renderizar las transiciones minimizadas del mDFA
           symbols={symbols}
           estadosFinales={mdfestadosFinales}
-          estadoInicial={estadoInicial!}
+          estadoInicial={estadoInicial}
           estadosSignifitivos={estadosSignificativos}
-          estadosIdenticos={estadosIdenticos!}
-          isMinimized={true} // mDFA
+          estadosIdenticos={estadosIdenticos}
           cadena={finalString}
+          isMinimized={true} // mDFA
         />
       )}
     </div>
