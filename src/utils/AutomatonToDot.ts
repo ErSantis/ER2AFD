@@ -3,9 +3,9 @@ import { State } from "../models/State";
 
 // Convierte el autómata NFA en un formato DOT que puede ser visualizado por viz.js
 export function nfaToDot(
-  automaton: Automaton, 
-  recorrido: { estadoActual: string, siguienteEstado: string, simbolo: string }[], 
-  estadoResaltado: string | null, 
+  automaton: Automaton,
+  recorrido: { estadoActual: string, siguienteEstado: string, simbolo: string }[],
+  estadoResaltado: string | null,
   transicionResaltada: { estadoActual: string, siguienteEstado: string } | null,
   estadoFinalAlcanzado: string | null
 ): string {
@@ -94,38 +94,37 @@ export function dfaToDot(
   dot += `  start [shape=point];\n  start -> ${estadoInicial};\n`;
 
   transitionTable.forEach(([state, transitions]) => {
-      let estadoStyle = 'shape=circle';
-      let colorStyle = '';
+    let estadoStyle = 'shape=circle';
+    let colorStyle = '';
 
-      // Si el estado actual es un estado de aceptación
-      if (estadosFinales.has(state)) {
-          estadoStyle = 'shape=doublecircle';
+    // Si el estado actual es un estado de aceptación
+    if (estadosFinales.has(state)) {
+      estadoStyle = 'shape=doublecircle';
+    }
+
+    // Si es el estado resaltado y final alcanzado, darle borde verde y relleno verde claro
+    if (estadoFinalAlcanzado === state) {
+      colorStyle = 'style=filled, fillcolor=green, color=green';
+    } else if (estadoResaltado === state) {
+      colorStyle = 'style=filled, fillcolor=yellow';
+    }
+
+    dot += `  ${state} [label="${state}", ${estadoStyle}, ${colorStyle}];\n`;
+
+    // Recorrer las transiciones para cada símbolo en el alfabeto
+    alphabet.forEach((symbol) => {
+      const targetState = transitions.get(symbol);
+      if (targetState) {
+        // Verificamos si esta es la transición resaltada basada en el símbolo también
+        const transicionColor = (transicionResaltada && transicionResaltada.estadoActual === state && transicionResaltada.siguienteEstado === targetState && transicionResaltada.simbolo === symbol)
+          ? 'color=red, penwidth=2'
+          : '';
+        dot += `  ${state} -> ${targetState} [label="${symbol}" ${transicionColor}];\n`;
       }
-
-      // Si es el estado resaltado y final alcanzado, darle borde verde y relleno verde claro
-      if (estadoFinalAlcanzado === state) {
-          colorStyle = 'style=filled, fillcolor=green, color=green';
-      } else if (estadoResaltado === state) {
-          colorStyle = 'style=filled, fillcolor=yellow';
-      }
-
-      dot += `  ${state} [label="${state}", ${estadoStyle}, ${colorStyle}];\n`;
-
-      // Recorrer las transiciones para cada símbolo en el alfabeto
-      alphabet.forEach((symbol) => {
-          const targetState = transitions.get(symbol);
-          if (targetState) {
-              // Verificamos si esta es la transición resaltada basada en el símbolo también
-              const transicionColor = (transicionResaltada && transicionResaltada.estadoActual === state && transicionResaltada.siguienteEstado === targetState && transicionResaltada.simbolo === symbol)
-                  ? 'color=red, penwidth=2'
-                  : '';
-              dot += `  ${state} -> ${targetState} [label="${symbol}" ${transicionColor}];\n`;
-          }
-      });
+    });
   });
 
   dot += '}';
   return dot;
 }
 
-  
