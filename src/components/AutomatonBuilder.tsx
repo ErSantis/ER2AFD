@@ -87,9 +87,14 @@ const AutomatonBuilder: React.FC = () => {
 
     // Validar que los | tengan algo a ambos lados
     const arePipesValid = (input: string): boolean => {
-      const validPipesRegex = /.[)?*+]*\|[^)\\|*?+]/;
-      return validPipesRegex.test(input);
-    }
+      // Asegurarse de que no haya pipes consecutivos sin nada válido entre ellos
+      const invalidPipesRegex = /\|\||\(\||\|\)|\|[*+?)]|(?<!\()\|(?=\))/;
+  
+      // Retorna true si no hay casos de pipes inválidos
+      return !invalidPipesRegex.test(input);
+    };
+  
+    // Si el input contiene un pipe y no pasa la validación de pipes, desactiva el botón
     if (input.includes("|") && !arePipesValid(input)) {
       setIsButtonEnabled(false);
       return;
