@@ -53,7 +53,8 @@ const DFATab: React.FC<DFATabProps> = ({
       )}
 
       {/* Mostrar la tabla de estados idénticos solo si el autómata está minimizado y hay estados idénticos */}
-      {isMinimized && estadosIdenticos && (
+      {isMinimized && estadosIdenticos && estadosIdenticos.size > 0 && (
+        
         <div>
           <h2>Estados Idénticos</h2>
           <ul>

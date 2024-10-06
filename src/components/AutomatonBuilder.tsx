@@ -32,7 +32,7 @@ const AutomatonBuilder: React.FC = () => {
 
     setSymbols([]); // Resetea los símbolos a un array vacío
     setNFA(null); // Resetea el NFA (Non-deterministic Finite Automaton) a null
-    //setFinalString(''); // Resetea la cadena final a una cadena vacía
+    setFinalString(''); // Resetea la cadena final a una cadena vacía
     setuDFATransitions(new Map()); // Limpia las transiciones uDFA (unminimized Deterministic Finite Automaton)
     setmDFATransitions(new Map()); // Limpia las transiciones mDFA (minimized Deterministic Finite Automaton)
     setEstadoLetra(new Map()); // Resetea el estado de las letras a un nuevo Map vacío
