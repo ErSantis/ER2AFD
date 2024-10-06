@@ -15,11 +15,11 @@ export function recorrerNFA(
   const stack: { estadoActual: string, restanteCadena: string, visitados: Set<string>, transicionesPendientes: any[] }[] = [];
 
   // Iniciamos desde el estado inicial
-  stack.push({ 
-    estadoActual: estadoInicial, 
-    restanteCadena: cadena, 
-    visitados: new Set([estadoInicial]), 
-    transicionesPendientes: [] 
+  stack.push({
+    estadoActual: estadoInicial,
+    restanteCadena: cadena,
+    visitados: new Set([estadoInicial]),
+    transicionesPendientes: []
   });
 
   while (stack.length > 0) {
@@ -84,6 +84,5 @@ export function recorrerNFA(
       }
     }
   }
-  console.log(recorrido, esAceptado)
   return { recorrido, esAceptado };
 }
