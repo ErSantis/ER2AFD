@@ -13,10 +13,21 @@ export function recorrerDFA(
   let estadoActual = estadoInicial;
   const recorrido: Transicion[] = [];
 
+  // Si la cadena es vacía, verificamos si el estado inicial es un estado de aceptación
+  if (cadena === "&") {
+    const esAceptado = estadosFinales.has(estadoInicial);
+    return {
+      recorrido: [{ estadoActual: estadoInicial, siguienteEstado: estadoInicial, simbolo: "ε" }],  // Simbolizamos la cadena vacía con "ε"
+      esAceptado
+    };
+  }
+
   // Iteramos sobre cada símbolo en la cadena
   for (let i = 0; i < cadena.length; i++) {
     const simbolo = cadena[i];
     const transiciones = dfaTransitions.get(estadoActual);
+
+
 
     // Verificamos si existen transiciones para el estado actual
     if (transiciones) {
