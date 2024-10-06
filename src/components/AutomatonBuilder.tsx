@@ -45,21 +45,22 @@ const AutomatonBuilder: React.FC = () => {
   };
 
   // Valida el input para construir el automata
-  const validateRegex = (input: string) => {
-    const isValid = input.length % 2 === 0; // Lógica de validación
-    if (isValid) {
-        setIsButtonEnabled(true);
-    } else {
-        setIsButtonEnabled(false);
-    }
-  };
-  
   // Manejar cambio del input de regex
   const handleRegexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setRegex(value); // Actualiza el estado del regex
-    validateRegex(value); // Llama a la función de validación (vacía por ahora)
-    };
+  };
+
+  // Validar el regex cada vez que el valor cambie
+  useEffect(() => {
+    validateRegex(regex); // Llama a la función de validación cada vez que regex cambie
+  }, [regex]);
+
+  // Función de validación
+  const validateRegex = (input: string) => {
+    const isValid = input.length % 2 === 0; // Lógica de validación
+    setIsButtonEnabled(isValid); // Actualiza el estado del botón
+  };
 
   // Construye el autómata
   const handleBuildAutomata = () => {
