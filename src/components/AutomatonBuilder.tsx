@@ -87,7 +87,7 @@ const AutomatonBuilder: React.FC = () => {
 
     // Validar que los | tengan algo a ambos lados
     const arePipesValid = (input: string): boolean => {
-      const validPipesRegex = /\w[)?*+]*\|\w/;
+      const validPipesRegex = /.[)?*+]*\|[^)\\|*?+]/;
       return validPipesRegex.test(input);
     }
     if (input.includes("|") && !arePipesValid(input)) {
@@ -97,7 +97,7 @@ const AutomatonBuilder: React.FC = () => {
 
     // Validar que los parentesis no esten vacios
     const hasEmptyParentheses = (input: string): boolean => {
-      const emptyParenthesesRegex = /\(\)/;
+      const emptyParenthesesRegex = /\(\)|\([*+?|]\)/;
       return emptyParenthesesRegex.test(input);
     };
     if (hasEmptyParentheses(input)) {
