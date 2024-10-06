@@ -5,6 +5,7 @@ import { recorrerDFA } from '../utils/recorrerDFA';
 import { recorrerNFA } from '../utils/recorrerNFA';
 import { generateTable } from '../utils/generateTable';
 import { DynamicAutomatonPros } from '../types/DynamicAutomaton.type';
+import '../styles/DynamicAutomaton.css'
 
 const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, automaton, dfaTransitions, symbols, estadosFinales, estadoInicial, cadena }) => {
     const [recorrido, setRecorrido] = useState<{ estadoActual: string, siguienteEstado: string, simbolo: string }[]>([]);
@@ -12,16 +13,19 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
     const [estadoResaltado, setEstadoResaltado] = useState<string | null>(null);
     const [transicionResaltada, setTransicionResaltada] = useState<{ estadoActual: string, siguienteEstado: string, simbolo: string } | null>(null);
     const [estadoFinalAlcanzado, setEstadoFinalAlcanzado] = useState<string | null>(null);
-    const [resetColors, setResetColors] = useState<boolean>(false); // Estado para resetear los colores
+    const [resetColors, setResetColors] = useState<boolean>(false); 
+    const [esAceptado, setEsAceptado] = useState<boolean>(false); 
+    const [mensaje, setMensaje] = useState<string | null>(null); 
+    const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
 
     // Obtener los estados finales desde el autómata si no se pasaron explícitamente
     const obtenerEstadosFinales = (): Set<string> => {
         if (estadosFinales) {
             return estadosFinales;
         } else if (automaton && automaton.acceptState) {
-            return new Set([automaton.acceptState.id.toString()]);  // Convertimos el ID del estado final a string
+            return new Set([automaton.acceptState.id.toString()]);  
         } else {
-            return new Set();  // Si no hay estado final, retornamos un conjunto vacío
+            return new Set();  
         }
     };
 
@@ -29,96 +33,114 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
         if (estadoInicial) {
             return estadoInicial;
         } else if (automaton && automaton.startState) {
-            return automaton.startState.id.toString();  // Convertimos el ID del estado inicial a string
+            return automaton.startState.id.toString();  
         } else {
-            return '';  // Si no hay estado inicial, retornamos una cadena vacía
+            return '';  
         }
     };
 
     useEffect(() => {
+        if (cadena === '') {
+            return;
+        }
+
+        setMensaje(null); // Reiniciamos el mensaje cuando empieza un nuevo recorrido.
+        
         const estadoInicialCalculado = obtenerEstadoInicial();
-        const estadosFinalesCalculados = obtenerEstadosFinales();  // Calculamos los estados finales en caso de que no los tengamos
+        const estadosFinalesCalculados = obtenerEstadosFinales(); 
 
         if (automatonType === 'DFA') {
-            const { recorrido } = recorrerDFA(cadena, dfaTransitions!, estadoInicialCalculado, estadosFinalesCalculados);
+            const { recorrido, esAceptado } = recorrerDFA(cadena, dfaTransitions!, estadoInicialCalculado, estadosFinalesCalculados);
             setRecorrido(recorrido);
+            setEsAceptado(esAceptado);
         } else {
             const table = generateTable(automaton!);
-            const { recorrido } = recorrerNFA(cadena, table.transitions, symbols, estadoInicialCalculado, estadosFinalesCalculados);
+            const { recorrido, esAceptado } = recorrerNFA(cadena, table.transitions, symbols, estadoInicialCalculado, estadosFinalesCalculados);
             setRecorrido(recorrido);
+            setEsAceptado(esAceptado);
         }
         setCurrentStep(0);
         setEstadoFinalAlcanzado(null);
-        setResetColors(false); // Reiniciamos los colores al empezar un nuevo recorrido
+        setResetColors(false); 
     }, [cadena, automaton, automatonType, estadoInicial, estadosFinales]);
 
     useEffect(() => {
-        const estadosFinalesCalculados = obtenerEstadosFinales();
-
         if (currentStep < recorrido.length) {
             const transicion = recorrido[currentStep];
 
-            // Resaltar el estado actual primero
             setEstadoResaltado(transicion.estadoActual);
-            setTransicionResaltada(null); // Asegurarnos de que la transición aún no esté resaltada
+            setTransicionResaltada(null); 
 
             const estadoTimeoutId = setTimeout(() => {
-                // Resaltamos solo la transición actual después de 500 ms
                 setTransicionResaltada({
                     estadoActual: transicion.estadoActual,
                     siguienteEstado: transicion.siguienteEstado,
-                    simbolo: transicion.simbolo,  // Incluimos el símbolo en la transición resaltada
+                    simbolo: transicion.simbolo,  
                 });
 
-                // Si estamos en el penúltimo paso y el siguiente estado es un estado final
-                if (currentStep === recorrido.length - 1 && estadosFinalesCalculados.has(transicion.siguienteEstado)) {
+                if (currentStep === recorrido.length - 1) {
                     const estadoFinalTimeoutId = setTimeout(() => {
-                        // Limpiamos la flecha y el penúltimo estado antes de resaltar el estado final
                         setEstadoResaltado(null);
                         setTransicionResaltada(null);
-                        setEstadoFinalAlcanzado(transicion.siguienteEstado); // Resaltamos el estado final
+                        setEstadoFinalAlcanzado(transicion.siguienteEstado); 
+
+                        // Mostrar el mensaje al terminar el recorrido
+                        if (esAceptado) {
+                            setMensaje('La cadena fue reconocida.');
+                            setMessageType('success');
+                        } else {
+                            setMensaje('La cadena no fue reconocida.');
+                            setMessageType('error');
+                        }
 
                         const resetFinalTimeoutId = setTimeout(() => {
-                            setEstadoFinalAlcanzado(null); // Reseteamos el color del estado final después de un tiempo
-                        }, 1000); // Tiempo adicional para que el estado final se quede resaltado un momento
+                            setEstadoFinalAlcanzado(null); 
+                        }, 1000); 
 
                         return () => clearTimeout(resetFinalTimeoutId);
-                    }, 500); // Espera antes de resaltar el estado final
+                    }, 500); 
 
                     return () => clearTimeout(estadoFinalTimeoutId);
                 }
 
-                // Avanzamos al siguiente paso después de otro medio segundo
                 const transicionTimeoutId = setTimeout(() => {
                     setCurrentStep((prevStep) => prevStep + 1);
                 }, 500);
 
                 return () => clearTimeout(transicionTimeoutId);
-            }, 500); // Esperamos 500 ms antes de resaltar la transición
+            }, 500); 
 
             return () => clearTimeout(estadoTimeoutId);
         } else {
             setEstadoResaltado(null);
             setTransicionResaltada(null);
-            setEstadoFinalAlcanzado(null); // Resetear el estado final cuando se termina el recorrido
+            setEstadoFinalAlcanzado(null); 
         }
     }, [currentStep, recorrido]);
 
-    // Generar el DOT dependiendo del tipo de autómata
     const dot = automatonType === 'DFA' ?
         dfaToDot(
             Array.from(dfaTransitions!.entries()),
             symbols,
-            obtenerEstadosFinales(),  // Usamos los estados finales calculados
+            obtenerEstadosFinales(),  
             estadoInicial!,
             recorrido,
-            resetColors ? null : estadoResaltado,  // Resetear colores si es necesario
+            resetColors ? null : estadoResaltado,  
             resetColors ? null : transicionResaltada,
-            resetColors ? null : estadoFinalAlcanzado
+            esAceptado ? estadoFinalAlcanzado : null 
         )
-        : nfaToDot(automaton!, recorrido, estadoResaltado, transicionResaltada, estadoFinalAlcanzado);
+        : nfaToDot(automaton!, recorrido, estadoResaltado, transicionResaltada, esAceptado ? estadoFinalAlcanzado : null);
 
-    return <AutomatonGraph dot={dot} />;
+    return (
+        <div>
+            <AutomatonGraph dot={dot} />
+            {mensaje && (
+                <div className={`mensaje ${messageType}`}>
+                    {mensaje}
+                </div>
+            )}
+        </div>
+    );
 };
 
 export default DynamicAutomaton;
