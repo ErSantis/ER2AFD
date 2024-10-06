@@ -83,7 +83,7 @@ const AutomatonBuilder: React.FC = () => {
       const validPipesRegex = /\w[)?*+]*\|\w/;
       return validPipesRegex.test(input);
     }
-    if (!arePipesValid(input)) {
+    if (input.includes("|") && !arePipesValid(input)) {
       setIsButtonEnabled(false);
       return;
     }
