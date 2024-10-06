@@ -72,11 +72,11 @@ const AutomatonBuilder: React.FC = () => {
     }
 
     // Validar que no contenga caracteres reservados
-    const hasReservedCharacters = /[\\\"]/;
-    if (hasReservedCharacters.test(input)) {
-        setIsButtonEnabled(false);
-        return;
-    }
+    // const hasReservedCharacters = /[\\\"]/;
+    // if (hasReservedCharacters.test(input)) {
+    //     setIsButtonEnabled(false);
+    //     return;
+    // }
 
     // Validar que no se repitan más de una vez los caracteres ?, +, y *
     const invalidRepeatRegex = /(\?|\+|\*)(\?|\+|\*)+/;
