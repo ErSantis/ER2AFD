@@ -23,6 +23,8 @@ const AutomatonBuilder: React.FC = () => {
   const [estadosSignificativos, setEstadosSignificativos] = useState<Map<string, Set<State>> | null>(null);
   const [estadosIdenticos, setEstadosIdenticos] = useState<Map<string, string[]> | null>(null);
 
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false); // Estado para habilitar o deshabilitar el botón
+
   const [inputString, setInputString] = useState(''); // Estado para controlar el input
   const [finalString, setFinalString] = useState(''); // Estado para guardar el valor cuando se presiona el botón
 
@@ -40,6 +42,96 @@ const AutomatonBuilder: React.FC = () => {
     setEstadoInicial(null);
     setEstadosSignificativos(new Map());
     setEstadosIdenticos(new Map());
+  };
+
+  // Valida el input para construir el automata
+  // Manejar cambio del input de regex
+  const handleRegexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setRegex(value); // Actualiza el estado del regex
+  };
+
+  // Validar el regex cada vez que el valor cambie
+  useEffect(() => {
+    validateRegex(regex); // Llama a la función de validación cada vez que regex cambie
+  }, [regex]);
+
+  // Función de validación
+  const validateRegex = (input: string) => {
+    // Si el input está vacío, deshabilitamos el botón
+    if (input.trim() === '') {
+        setIsButtonEnabled(false);
+        return;
+    }
+
+    // Validar que empiece con algo válido (un carácter o una expresión entre paréntesis)
+    const validStartRegex = /^([^)\\|*?+]+.*)$/;
+    if (!validStartRegex.test(input)) {
+        setIsButtonEnabled(false);
+        return;
+    }
+
+    // Validar que no contenga caracteres reservados
+    // const hasReservedCharacters = /[\\\"]/;
+    // if (hasReservedCharacters.test(input)) {
+    //     setIsButtonEnabled(false);
+    //     return;
+    // }
+
+    // Validar que no se repitan más de una vez los caracteres ?, +, y *
+    const invalidRepeatRegex = /(\?|\+|\*)(\?|\+|\*)+/;
+    if (invalidRepeatRegex.test(input)) {
+        setIsButtonEnabled(false);
+        return;
+    }
+
+    // Validar que los | tengan algo a ambos lados
+    const arePipesValid = (input: string): boolean => {
+      // Asegurarse de que no haya pipes consecutivos sin nada válido entre ellos
+      const invalidPipesRegex = /\|\||\(\||\|\)|\|[*+?)]|(?<!\()\|(?=\))/;
+  
+      // Retorna true si no hay casos de pipes inválidos
+      return !invalidPipesRegex.test(input);
+    };
+  
+    // Si el input contiene un pipe y no pasa la validación de pipes, desactiva el botón
+    if (input.includes("|") && !arePipesValid(input)) {
+      setIsButtonEnabled(false);
+      return;
+    }
+
+    // Validar que los parentesis no esten vacios
+    const hasEmptyParentheses = (input: string): boolean => {
+      const emptyParenthesesRegex = /\(\)|\([*+?|]\)/;
+      return emptyParenthesesRegex.test(input);
+    };
+    if (hasEmptyParentheses(input)) {
+      setIsButtonEnabled(false);
+      return;
+    }
+  
+
+    // Validar que los paréntesis estén balanceados
+    const areParenthesesBalanced = (str: string): boolean => {
+        let stack: string[] = [];
+        for (let char of str) {
+            if (char === '(') {
+                stack.push(char);
+            } else if (char === ')') {
+                if (stack.length === 0) {
+                    return false;
+                }
+                stack.pop();
+            }
+        }
+        return stack.length === 0;
+    };
+
+    if (!areParenthesesBalanced(input)) {
+        setIsButtonEnabled(false);
+        return;
+    }
+    setIsButtonEnabled(true);
   };
 
   // Construye el autómata
@@ -114,7 +206,12 @@ const AutomatonBuilder: React.FC = () => {
           onChange={(e) => setRegex(e.target.value)}
           placeholder="Enter regular expression"
         />
-        <button onClick={() => { handleBuildAutomata(), setActiveTab('NFA') }}>Build Automata</button>
+        <button
+          onClick={() => { handleBuildAutomata(), setActiveTab('NFA') }}
+          disabled={!isButtonEnabled} // Controla si el botón está habilitado o deshabilitad
+        >
+          Build Automata
+        </button>
         <input
           type="text"
           value={inputString}
