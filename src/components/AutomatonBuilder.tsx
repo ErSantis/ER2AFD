@@ -65,7 +65,7 @@ const AutomatonBuilder: React.FC = () => {
       }
 
       // Validar que empiece con algo válido (un carácter o una expresión entre paréntesis)
-      const validStartRegex = /^(\w+.*|\(\w+.*\))+$/;
+      const validStartRegex = /^(\w+.*|\(\w+.*)+$/;
       if (!validStartRegex.test(input)) {
           setIsButtonEnabled(false);
           return;
