@@ -65,7 +65,7 @@ const AutomatonBuilder: React.FC = () => {
     }
 
     // Validar que empiece con algo válido (un carácter o una expresión entre paréntesis)
-    const validStartRegex = /^([^()\|*?+]+.*|\([^()\|*?+]+.*)+$/;
+    const validStartRegex = /^([^)\|*?+]+.*|\([^)\|*?+]+.*)+$/;
     if (!validStartRegex.test(input)) {
         setIsButtonEnabled(false);
         return;
@@ -76,6 +76,16 @@ const AutomatonBuilder: React.FC = () => {
     if (invalidRepeatRegex.test(input)) {
         setIsButtonEnabled(false);
         return;
+    }
+
+    // Validar que los | tengan algo a ambos lados
+    const arePipesValid = (input: string): boolean => {
+      const validPipesRegex = /\w[)?*+]*\|\w/;
+      return validPipesRegex.test(input);
+    }
+    if (!arePipesValid(input)) {
+      setIsButtonEnabled(false);
+      return;
     }
 
     // Validar que los parentesis no esten vacios
