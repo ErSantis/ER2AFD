@@ -34,6 +34,8 @@ export function nfaToDot(
     // Obtener el id del estado actual
     const currentStateId = stateMap.get(state) as number;
 
+    state.id = currentStateId;
+
     // Marcar el estado como de aceptación si es necesario
     let estadoStyle = 'shape=circle';
     let colorStyle = '';
