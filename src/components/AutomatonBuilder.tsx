@@ -72,7 +72,7 @@ const AutomatonBuilder: React.FC = () => {
       }
 
       // Validar que no se repitan más de una vez los caracteres ?, +, y *
-      const invalidRepeatRegex = /\?\?+|\+\++|\*\*+/;
+      const invalidRepeatRegex = /(\?|\+|\*)(\?|\+|\*)+/;
       if (invalidRepeatRegex.test(input)) {
           setIsButtonEnabled(false);
           return;
