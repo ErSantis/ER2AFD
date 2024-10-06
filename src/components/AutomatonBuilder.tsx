@@ -65,8 +65,15 @@ const AutomatonBuilder: React.FC = () => {
     }
 
     // Validar que empiece con algo válido (un carácter o una expresión entre paréntesis)
-    const validStartRegex = /^([^)\|*?+]+.*|\([^)\|*?+]+.*)+$/;
+    const validStartRegex = /^([^)\\|*?+]+.*)$/;
     if (!validStartRegex.test(input)) {
+        setIsButtonEnabled(false);
+        return;
+    }
+
+    // Validar que no contenga caracteres reservados
+    const hasReservedCharacters = /[\\\"]/;
+    if (hasReservedCharacters.test(input)) {
         setIsButtonEnabled(false);
         return;
     }
