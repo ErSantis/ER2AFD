@@ -52,53 +52,64 @@ const AutomatonBuilder: React.FC = () => {
   };
 
   // Validar el regex cada vez que el valor cambie
-    useEffect(() => {
-      validateRegex(regex); // Llama a la función de validación cada vez que regex cambie
-    }, [regex]);
+  useEffect(() => {
+    validateRegex(regex); // Llama a la función de validación cada vez que regex cambie
+  }, [regex]);
 
-    // Función de validación
-    const validateRegex = (input: string) => {
-      // Si el input está vacío, deshabilitamos el botón
-      if (input.trim() === '') {
-          setIsButtonEnabled(false);
-          return;
-      }
+  // Función de validación
+  const validateRegex = (input: string) => {
+    // Si el input está vacío, deshabilitamos el botón
+    if (input.trim() === '') {
+        setIsButtonEnabled(false);
+        return;
+    }
 
-      // Validar que empiece con algo válido (un carácter o una expresión entre paréntesis)
-      const validStartRegex = /^(\w+.*|\(\w+.*)+$/;
-      if (!validStartRegex.test(input)) {
-          setIsButtonEnabled(false);
-          return;
-      }
+    // Validar que empiece con algo válido (un carácter o una expresión entre paréntesis)
+    const validStartRegex = /^([^()\|*?+]+.*|\([^()\|*?+]+.*)+$/;
+    if (!validStartRegex.test(input)) {
+        setIsButtonEnabled(false);
+        return;
+    }
 
-      // Validar que no se repitan más de una vez los caracteres ?, +, y *
-      const invalidRepeatRegex = /(\?|\+|\*)(\?|\+|\*)+/;
-      if (invalidRepeatRegex.test(input)) {
-          setIsButtonEnabled(false);
-          return;
-      }
+    // Validar que no se repitan más de una vez los caracteres ?, +, y *
+    const invalidRepeatRegex = /(\?|\+|\*)(\?|\+|\*)+/;
+    if (invalidRepeatRegex.test(input)) {
+        setIsButtonEnabled(false);
+        return;
+    }
 
-      // Validar que los paréntesis estén balanceados
-      const areParenthesesBalanced = (str: string): boolean => {
-          let stack: string[] = [];
-          for (let char of str) {
-              if (char === '(') {
-                  stack.push(char);
-              } else if (char === ')') {
-                  if (stack.length === 0) {
-                      return false;
-                  }
-                  stack.pop();
-              }
-          }
-          return stack.length === 0;
-      };
+    // Validar que los parentesis no esten vacios
+    const hasEmptyParentheses = (input: string): boolean => {
+      const emptyParenthesesRegex = /\(\)/;
+      return emptyParenthesesRegex.test(input);
+    };
+    if (hasEmptyParentheses(input)) {
+      setIsButtonEnabled(false);
+      return;
+    }
+  
 
-      if (!areParenthesesBalanced(input)) {
-          setIsButtonEnabled(false);
-          return;
-      }
-      setIsButtonEnabled(true);
+    // Validar que los paréntesis estén balanceados
+    const areParenthesesBalanced = (str: string): boolean => {
+        let stack: string[] = [];
+        for (let char of str) {
+            if (char === '(') {
+                stack.push(char);
+            } else if (char === ')') {
+                if (stack.length === 0) {
+                    return false;
+                }
+                stack.pop();
+            }
+        }
+        return stack.length === 0;
+    };
+
+    if (!areParenthesesBalanced(input)) {
+        setIsButtonEnabled(false);
+        return;
+    }
+    setIsButtonEnabled(true);
   };
 
   // Construye el autómata
