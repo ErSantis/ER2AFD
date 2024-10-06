@@ -1,5 +1,7 @@
 import { Automaton } from "../models/Automaton";
 import { State } from "../models/State";
+import { escapeDotLabel } from "./escapeDotLabel";
+
 
 // Convierte el autómata NFA en un formato DOT que puede ser visualizado por viz.js
 export function nfaToDot(
@@ -32,7 +34,6 @@ export function nfaToDot(
     // Obtener el id del estado actual
     const currentStateId = stateMap.get(state) as number;
 
-    // Asignar el id de la etiqueta al id del estado
     state.id = currentStateId;
 
     // Marcar el estado como de aceptación si es necesario
@@ -50,7 +51,8 @@ export function nfaToDot(
       colorStyle = 'style=filled, fillcolor=yellow';
     }
 
-    dot += `  ${currentStateId} [label="${currentStateId}", ${estadoStyle}, ${colorStyle}];\n`;
+    // Escapar las etiquetas de los estados
+    dot += `  ${currentStateId} [label="${escapeDotLabel(currentStateId.toString())}", ${estadoStyle}, ${colorStyle}];\n`;
 
     // Recorrer las transiciones del estado actual
     state.transitions.forEach(({ symbol, state: nextState }) => {
@@ -64,8 +66,8 @@ export function nfaToDot(
         transicionColor = 'color=red, penwidth=2';
       }
 
-      // Agregar la transición al DOT
-      dot += `  ${currentStateId} -> ${nextStateId} [label="${symbol || 'ε'}" ${transicionColor}];\n`;
+      // Escapar el símbolo de la transición
+      dot += `  ${currentStateId} -> ${nextStateId} [label="${escapeDotLabel(symbol || 'ε')}" ${transicionColor}];\n`;
 
       if (!visited.has(nextState)) {
         queue.push(nextState);
@@ -76,7 +78,6 @@ export function nfaToDot(
   dot += '}'; // Cerrar el grafo DOT
   return dot;
 }
-
 
 export function dfaToDot(
   transitionTable: [string, Map<string, string>][],
@@ -109,7 +110,8 @@ export function dfaToDot(
       colorStyle = 'style=filled, fillcolor=yellow';
     }
 
-    dot += `  ${state} [label="${state}", ${estadoStyle}, ${colorStyle}];\n`;
+    // Escapar las etiquetas de los estados
+    dot += `  ${escapeDotLabel(state)} [label="${escapeDotLabel(state)}", ${estadoStyle}, ${colorStyle}];\n`;
 
     // Recorrer las transiciones para cada símbolo en el alfabeto
     alphabet.forEach((symbol) => {
@@ -119,7 +121,9 @@ export function dfaToDot(
         const transicionColor = (transicionResaltada && transicionResaltada.estadoActual === state && transicionResaltada.siguienteEstado === targetState && transicionResaltada.simbolo === symbol)
           ? 'color=red, penwidth=2'
           : '';
-        dot += `  ${state} -> ${targetState} [label="${symbol}" ${transicionColor}];\n`;
+
+        // Escapar el símbolo de la transición
+        dot += `  ${escapeDotLabel(state)} -> ${escapeDotLabel(targetState)} [label="${escapeDotLabel(symbol)}" ${transicionColor}];\n`;
       }
     });
   });
@@ -127,4 +131,3 @@ export function dfaToDot(
   dot += '}';
   return dot;
 }
-
