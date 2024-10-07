@@ -197,6 +197,7 @@ const AutomatonBuilder: React.FC = () => {
                   handleBuildAutomata();
                   setActiveTab("NFA");
                 }}
+                disabled={!isButtonEnabled}
                 style={!isButtonEnabled ? { ...ButtonStyle, opacity: 0.5, cursor: 'not-allowed' } : ButtonStyle}
               >
                 Build Automata
