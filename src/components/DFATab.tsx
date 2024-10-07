@@ -18,55 +18,57 @@ const DFATab: React.FC<DFATabProps> = ({
 }) => {
 
   return (
-    <div>
-      <h2>{isMinimized ? 'Automata Finito Determinista Minimizado (mDFA)' : 'Automata Finito Determinista (DFA)'}</h2>
+    <div className="dfatab-container">
+      <div className="dfatab-automaton-container">
+        <h2>{isMinimized ? 'Automata Finito Determinista Minimizado (mDFA)' : 'Automata Finito Determinista (DFA)'}</h2>
 
-      {/* Renderizar el gráfico del AFD */}
-      <DynamicAutomaton
-        dfaTransitions={dfaTransitions}
-        symbols={symbols}
-        estadosFinales={estadosFinales}
-        estadoInicial={estadoInicial}
-        cadena={cadena}
-        automatonType={'DFA'}
-      />
+        <DynamicAutomaton
+          dfaTransitions={dfaTransitions}
+          symbols={symbols}
+          estadosFinales={estadosFinales}
+          estadoInicial={estadoInicial}
+          cadena={cadena}
+          automatonType={'DFA'}
+        />
+      </div>
 
-      {/* Renderizar la tabla de transiciones utilizando el nuevo componente */}
-      <DFATransitionTable
-        dfaTransitions={dfaTransitions}
-        symbols={symbols}
-        estadosFinales={estadosFinales}
-        estadoInicial={estadoInicial}
-      />
-
-      {/* Renderiza la tabla de estados del AFD y su equivalencia en estados del AFN */}
-      {isMinimized ? (
-        <div>
-          <h2>Estados Significativos</h2>
-          <StateMap StateMap={estadosSignifitivos!} />
+      <div className="dfatab-tables-container">
+        <div className="table-container">
+          <DFATransitionTable
+            dfaTransitions={dfaTransitions}
+            symbols={symbols}
+            estadosFinales={estadosFinales}
+            estadoInicial={estadoInicial}
+          />
         </div>
-      ) : (
-        <div>
-          <h2>Correspondencia de Conjuntos AFN a Estados DFA</h2>
-          <StateMap StateMap={conjuntoAFNMap!} />
-        </div>
-      )}
 
-      {/* Mostrar la tabla de estados idénticos solo si el autómata está minimizado y hay estados idénticos */}
-      {isMinimized && estadosIdenticos && estadosIdenticos.size > 0 && (
-        
         <div>
-          <h2>Estados Idénticos</h2>
-          <ul>
-            {Array.from(estadosIdenticos.entries()).map(([estadoRepresentativo, equivalentes]) => (
-              <li key={estadoRepresentativo}>
-                {formatIdenticalStates([...equivalentes])}
-              </li>
-            ))}
-          </ul>
+          {isMinimized ? (
+            <div className="table-container">
+              <h2>Estados Significativos</h2>
+              <StateMap StateMap={estadosSignifitivos!} />
+            </div>
+          ) : (
+            <div className="table-container2">
+              <h2>Correspondencia de Conjuntos AFN a Estados DFA</h2>
+              <StateMap StateMap={conjuntoAFNMap!} />
+            </div>
+          )}
         </div>
-      )}
 
+        {isMinimized && estadosIdenticos && estadosIdenticos.size > 0 && (
+          <div className="equal-container">
+            <h2>Estados Idénticos</h2>
+            <ul>
+              {Array.from(estadosIdenticos.entries()).map(([estadoRepresentativo, equivalentes]) => (
+                <li key={estadoRepresentativo}>
+                  {formatIdenticalStates([...equivalentes])}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
