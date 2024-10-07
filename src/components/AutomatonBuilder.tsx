@@ -13,12 +13,6 @@ import { useAutomatonContext } from './AutomatonContext';
 
 const AutomatonBuilder: React.FC = () => {
 
-  // const [regex, setRegex] = useState<string>(""); // Expresión regular ingresada por el usuario
-  // const [nfa, setNFA] = useState<Automaton | null>(null); // AFN generado
-  // const [finalString, setFinalString] = useState(""); // Estado para guardar el valor cuando se presiona el botón
-  // const [symbols, setSymbols] = useState<string[]>([]); // Símbolos del alfabeto
-  // const [activeTab, setActiveTab] = useState<'NFA' | 'uDFA' | 'DFA'>('NFA'); // Controla la pestaña activa
-  // const [isButtonEnabled, setIsButtonEnabled] = useState(false); // Estado para habilitar o deshabilitar el botón
   const [isAutomatonBuilt, setIsAutomatonBuilt] = useState(false);
   const [udfaTransitions, setuDFATransitions] = useState<Map<string, Map<string, string>> | null>(null); // Transiciones del uDFA (AFD no minimizado)
   const [estadoLetra, setEstadoLetra] = useState<Map<string, Set<State>> | null>(null); // Relacion entre el estado DFA - conjunto AFN
@@ -239,7 +233,9 @@ const AutomatonBuilder: React.FC = () => {
               </button>
             </div>
 
-            {symbols.length > 0 && <h2>Alfabeto: {symbols.join(", ")}</h2>}
+            {symbols.length > 0 && (
+              <h2>Alfabeto: {symbols.filter(symbol => symbol !== "&").join(", ")}</h2>
+            )}
             {activeTab === "NFA" && nfa && <NFATab automaton={nfa} />}
             {activeTab === "uDFA" &&
               udfaTransitions &&
