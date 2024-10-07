@@ -13,7 +13,7 @@ export const validateRegex = (input: string, setIsButtonEnabled: (enabled: boole
         setIsButtonEnabled(false);
         return;
     }
-
+    // Linea sin nada para probar los comits
     // Validar que empiece con algo válido (un carácter o una expresión entre paréntesis)
     const validStartRegex = /^([^)\\|*?+]+.*)$/;
     if (!validStartRegex.test(input)) {
