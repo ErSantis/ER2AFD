@@ -19,7 +19,7 @@ const AutomatonBuilder: React.FC = () => {
   // const [symbols, setSymbols] = useState<string[]>([]); // Símbolos del alfabeto
   // const [activeTab, setActiveTab] = useState<'NFA' | 'uDFA' | 'DFA'>('NFA'); // Controla la pestaña activa
   // const [isButtonEnabled, setIsButtonEnabled] = useState(false); // Estado para habilitar o deshabilitar el botón
-
+  const [isAutomatonBuilt, setIsAutomatonBuilt] = useState(false);
   const [udfaTransitions, setuDFATransitions] = useState<Map<string, Map<string, string>> | null>(null); // Transiciones del uDFA (AFD no minimizado)
   const [estadoLetra, setEstadoLetra] = useState<Map<string, Set<State>> | null>(null); // Relacion entre el estado DFA - conjunto AFN
   const [estadosFinales, setEstadosFinales] = useState<Set<string> | null>(null); // Estados finales deL UDFA
@@ -91,6 +91,7 @@ const AutomatonBuilder: React.FC = () => {
       handleuDFA(nfa, symbols); // Construir el uDFA
       handlemDFA(); // Contruti el mDFA
     }
+    setIsAutomatonBuilt(true);
   };
 
   // Construye el uDFA a partir del NFA
@@ -208,66 +209,70 @@ const AutomatonBuilder: React.FC = () => {
       </header>
 
       <main className="mainContentStyle">
-        <div className="buttonsContainerStyle">
-          <button
-            onClick={() => setActiveTab("NFA")}
-            className={activeTab === "NFA" ? "active" : ""}
-            style={ButtonStyle}
-          >
-            NFA
-          </button>
-          <button
-            onClick={() => setActiveTab("uDFA")}
-            className={activeTab === "uDFA" ? "active" : ""}
-            style={ButtonStyle}
-          >
-            uDFA
-          </button>
-          <button
-            onClick={() => setActiveTab("DFA")}
-            className={activeTab === "DFA" ? "active" : ""}
-            style={ButtonStyle}
-          >
-            mDFA
-          </button>
-        </div>
-        <div className="divSymbolsStyle">
-          {symbols.length > 0 && <h2>Alfabeto: {symbols.join(", ")}</h2>}
-        </div>
+        {!isAutomatonBuilt ? (
+          <div className="emptyMessageStyle">
+            <h2>Ingresa una expresión regular para empezar</h2>
+          </div>
+        ) : (
+          <>
+            <div className="buttonsContainerStyle">
+              <button
+                onClick={() => setActiveTab("NFA")}
+                className={activeTab === "NFA" ? "active" : ""}
+                style={ButtonStyle}
+              >
+                NFA
+              </button>
+              <button
+                onClick={() => setActiveTab("uDFA")}
+                className={activeTab === "uDFA" ? "active" : ""}
+                style={ButtonStyle}
+              >
+                uDFA
+              </button>
+              <button
+                onClick={() => setActiveTab("DFA")}
+                className={activeTab === "DFA" ? "active" : ""}
+                style={ButtonStyle}
+              >
+                mDFA
+              </button>
+            </div>
 
-        {activeTab === "NFA" && nfa && (
-          <NFATab automaton={nfa} />
+            {symbols.length > 0 && <h2>Alfabeto: {symbols.join(", ")}</h2>}
+            {activeTab === "NFA" && nfa && <NFATab automaton={nfa} />}
+            {activeTab === "uDFA" &&
+              udfaTransitions &&
+              estadoInicial &&
+              estadosFinales &&
+              estadoLetra && (
+                <DFATab
+                  dfaTransitions={udfaTransitions}
+                  estadosFinales={estadosFinales}
+                  estadoInicial={estadoInicial}
+                  conjuntoAFNMap={estadoLetra}
+                  isMinimized={false} // uDFA
+                />
+              )}
+            {activeTab === "DFA" &&
+              mdfaTransitions &&
+              mdfestadosFinales &&
+              estadosSignificativos &&
+              estadoInicial &&
+              estadosIdenticos && (
+                <DFATab
+                  dfaTransitions={mdfaTransitions}
+                  estadosFinales={mdfestadosFinales}
+                  estadoInicial={estadoInicial}
+                  estadosSignifitivos={estadosSignificativos}
+                  estadosIdenticos={estadosIdenticos}
+                  isMinimized={true} // mDFA
+                />
+              )}
+          </>
         )}
-
-        {activeTab === "uDFA" &&
-          udfaTransitions &&
-          estadoInicial &&
-          estadosFinales &&
-          estadoLetra && (
-            <DFATab
-              dfaTransitions={udfaTransitions}
-              estadosFinales={estadosFinales}
-              estadoInicial={estadoInicial}
-              conjuntoAFNMap={estadoLetra}
-              isMinimized={false} // uDFA
-            />
-          )}
-        {activeTab === "DFA" &&
-          mdfaTransitions &&
-          mdfestadosFinales &&
-          estadosSignificativos &&
-          estadoInicial &&
-          estadosIdenticos && (
-            <DFATab
-              dfaTransitions={mdfaTransitions}
-              estadosFinales={mdfestadosFinales}
-              estadoInicial={estadoInicial}
-              estadosSignifitivos={estadosSignificativos}
-              estadosIdenticos={estadosIdenticos}
-              isMinimized={true} // mDFA
-            />
-          )}
       </main>
+
     </div>
   );
 };
