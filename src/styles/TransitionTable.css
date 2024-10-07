@@ -6,6 +6,8 @@
     margin: 20px auto;
     border-collapse: collapse;
     text-align: center;
+    border: #213547 2px solid;
+
   }
   
   .transition-table th, .transition-table td {
@@ -14,7 +16,7 @@
   }
   
   .transition-table th {
-    background-color: #4CAF50;
+    background-color: #405c89;
     color: white;
     font-weight: bold;
   }

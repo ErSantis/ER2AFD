@@ -7,12 +7,19 @@ import DFATab from './DFATab';
 import { Automaton } from '../models/Automaton';
 import { extractSymbolsFromRegxex } from '../utils/extractSymbols';
 import { State } from '../models/State';
+import { ButtonStyle } from '../styles/ButtonStyle';
 
 const AutomatonBuilder: React.FC = () => {
-  const [regex, setRegex] = useState<string>(''); // Expresión regular ingresada por el usuario
+  const [regex, setRegex] = useState<string>(""); // Expresión regular ingresada por el usuario
   const [nfa, setNFA] = useState<Automaton | null>(null); // AFN generado
-  const [udfaTransitions, setuDFATransitions] = useState<Map<string, Map<string, string>> | null>(null); // Transiciones del uDFA (AFD no minimizado)
-  const [mdfaTransitions, setmDFATransitions] = useState<Map<string, Map<string, string>> | null>(null); // Transiciones del mDFA (AFD minimizado)
+  const [udfaTransitions, setuDFATransitions] = useState<Map<
+    string,
+    Map<string, string>
+  > | null>(null); // Transiciones del uDFA (AFD no minimizado)
+  const [mdfaTransitions, setmDFATransitions] = useState<Map<
+    string,
+    Map<string, string>
+  > | null>(null); // Transiciones del mDFA (AFD minimizado)
   const [symbols, setSymbols] = useState<string[]>([]); // Símbolos del alfabeto
   const [activeTab, setActiveTab] = useState<'NFA' | 'uDFA' | 'DFA'>('NFA'); // Controla la pestaña activa
   const [estadoLetra, setEstadoLetra] = useState<Map<string, Set<State>> | null>(null); // Relacion entre el estado DFA - conjunto AFN
@@ -24,8 +31,8 @@ const AutomatonBuilder: React.FC = () => {
 
   const [isButtonEnabled, setIsButtonEnabled] = useState(false); // Estado para habilitar o deshabilitar el botón
 
-  const [inputString, setInputString] = useState(''); // Estado para controlar el input
-  const [finalString, setFinalString] = useState(''); // Estado para guardar el valor cuando se presiona el botón
+  const [inputString, setInputString] = useState(""); // Estado para controlar el input
+  const [finalString, setFinalString] = useState(""); // Estado para guardar el valor cuando se presiona el botón
 
   const [runSimulation, SetRunSimulation] = useState<boolean>(false)
 
@@ -62,15 +69,15 @@ const AutomatonBuilder: React.FC = () => {
   const validateRegex = (input: string) => {
     // Si el input está vacío, deshabilitamos el botón
     if (input.trim() === '') {
-        setIsButtonEnabled(false);
-        return;
+      setIsButtonEnabled(false);
+      return;
     }
 
     // Validar que empiece con algo válido (un carácter o una expresión entre paréntesis)
     const validStartRegex = /^([^)\\|*?+]+.*)$/;
     if (!validStartRegex.test(input)) {
-        setIsButtonEnabled(false);
-        return;
+      setIsButtonEnabled(false);
+      return;
     }
 
     // Validar que no contenga caracteres reservados
@@ -83,19 +90,19 @@ const AutomatonBuilder: React.FC = () => {
     // Validar que no se repitan más de una vez los caracteres ?, +, y *
     const invalidRepeatRegex = /(\?|\+|\*)(\?|\+|\*)+/;
     if (invalidRepeatRegex.test(input)) {
-        setIsButtonEnabled(false);
-        return;
+      setIsButtonEnabled(false);
+      return;
     }
 
     // Validar que los | tengan algo a ambos lados
     const arePipesValid = (input: string): boolean => {
       // Asegurarse de que no haya pipes consecutivos sin nada válido entre ellos
       const invalidPipesRegex = /\|\||\(\||\|\)|\|[*+?)]|(?<!\()\|(?=\))/;
-  
+
       // Retorna true si no hay casos de pipes inválidos
       return !invalidPipesRegex.test(input);
     };
-  
+
     // Si el input contiene un pipe y no pasa la validación de pipes, desactiva el botón
     if (input.includes("|") && !arePipesValid(input)) {
       setIsButtonEnabled(false);
@@ -111,27 +118,27 @@ const AutomatonBuilder: React.FC = () => {
       setIsButtonEnabled(false);
       return;
     }
-  
+
 
     // Validar que los paréntesis estén balanceados
     const areParenthesesBalanced = (str: string): boolean => {
-        let stack: string[] = [];
-        for (let char of str) {
-            if (char === '(') {
-                stack.push(char);
-            } else if (char === ')') {
-                if (stack.length === 0) {
-                    return false;
-                }
-                stack.pop();
-            }
+      let stack: string[] = [];
+      for (let char of str) {
+        if (char === '(') {
+          stack.push(char);
+        } else if (char === ')') {
+          if (stack.length === 0) {
+            return false;
+          }
+          stack.pop();
         }
-        return stack.length === 0;
+      }
+      return stack.length === 0;
     };
 
     if (!areParenthesesBalanced(input)) {
-        setIsButtonEnabled(false);
-        return;
+      setIsButtonEnabled(false);
+      return;
     }
     setIsButtonEnabled(true);
   };
@@ -146,12 +153,10 @@ const AutomatonBuilder: React.FC = () => {
     setNFA(buildNFAFromRegex(regex)); //Contruir el NFA
 
     if (nfa) {
-      handleuDFA(nfa, symbols) // Construir el uDFA
-      handlemDFA() // Contruti el mDFA
+      handleuDFA(nfa, symbols); // Construir el uDFA
+      handlemDFA(); // Contruti el mDFA
     }
-
   };
-
 
   // Construye el uDFA a partir del NFA
   const handleuDFA = (nfa: Automaton, symbols: string[]) => {
@@ -169,7 +174,15 @@ const AutomatonBuilder: React.FC = () => {
   // Construye el mDFA minimizando el uDFA
   const handlemDFA = () => {
     if (udfaTransitions && estadosSignificativos && estadosFinales) {
-      const { nuevasTransicionesAFD, nuevosEstadosFinales, gruposEquivalentes } = buildmDFAFromuDFA(udfaTransitions, estadosSignificativos, estadosFinales);
+      const {
+        nuevasTransicionesAFD,
+        nuevosEstadosFinales,
+        gruposEquivalentes,
+      } = buildmDFAFromuDFA(
+        udfaTransitions,
+        estadosSignificativos,
+        estadosFinales
+      );
 
       setmDFATransitions(nuevasTransicionesAFD); // Guardar las transiciones minimizadas del mDFA
       setmdfEstadosFinales(nuevosEstadosFinales); // Establecer los nuevos estados finales minimizados
@@ -183,102 +196,133 @@ const AutomatonBuilder: React.FC = () => {
 
     if (activeTab === 'uDFA' && nfa) {
       handleuDFA(nfa, symbols); // Recalcular el uDFA al cambiar a la pestaña
-    } else if (activeTab === 'DFA' && nfa) {
+    } else if (activeTab === "DFA" && nfa) {
       handlemDFA(); // Minimizar DFA al cambiar de pestaña
     }
-    setFinalString('')
-
+    setFinalString("");
   }, [activeTab, nfa, regex]);
-
 
   const handleInputChange = (e) => {
     setInputString(e.target.value); // Actualiza el valor del input mientras escribes
   };
 
   const handleSubmit = () => {
-    setFinalString(''); // Resetea la cadena final para asegurarte de que siempre haya un cambio de estado
+    setFinalString(""); // Resetea la cadena final para asegurarte de que siempre haya un cambio de estado
     setTimeout(() => setFinalString(inputString), 0); // Establece la cadena final nuevamente con un pequeño retraso
   };
 
 
   return (
     <div>
-      <h1>ER2mAFD</h1>
-      <div>
-        <input
-          type="text"
-          value={regex}
-          onChange={(e) => setRegex(e.target.value)}
-          placeholder="Enter regular expression"
-        />
-        <button
-          onClick={() => { handleBuildAutomata(), setActiveTab('NFA') }}
-          disabled={!isButtonEnabled} // Controla si el botón está habilitado o deshabilitad
-        >
-          Build Automata
-        </button>
-        <input
-          type="text"
-          value={inputString}
-          onChange={(e) => handleInputChange(e)}
-          placeholder="Enter string"
-        />
-        <button onClick={handleSubmit}>Test</button>
-      </div>
+      <header className='headerStyle'>
+        <div className='containerStyle'>
+          <a href="/">
+            <img className='logoStyle' src="./logo.png" alt="Logo" />
+          </a>
+          <div className='buttonsContainerStyle'>
+            <button
+              onClick={() => setActiveTab("NFA")}
+              className={activeTab === "NFA" ? "active" : ""}
+              style={ButtonStyle}
+            >
+              NFA
+            </button>
+            <button
+              onClick={() => setActiveTab("uDFA")}
+              className={activeTab === "uDFA" ? "active" : ""}
+              style={ButtonStyle}
+            >
+              uDFA
+            </button>
+            <button
+              onClick={() => setActiveTab("DFA")}
+              className={activeTab === "DFA" ? "active" : ""}
+              style={ButtonStyle}
+            >
+              mDFA
+            </button>
+          </div>
 
-      {/* Mostrar símbolos únicos */}
-      <div>
-        {symbols.length > 0 && (
-          <p>
-            Alfabeto: {symbols.join(', ')}
-          </p>
+          <div className='inputContainerStyle'>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <input
+                type="text"
+                value={regex}
+                onChange={(e) => setRegex(e.target.value)}
+                placeholder="Enter regular expression"
+                className='inputStyle'
+              />
+              <button
+                onClick={() => {
+                  handleBuildAutomata();
+                  setActiveTab("NFA");
+                }}
+                style={!isButtonEnabled ? { ...ButtonStyle, opacity: 0.5, cursor: 'not-allowed' } : ButtonStyle}
+              >
+                Build Automata
+              </button>
+            </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <input
+                type="text"
+                value={inputString}
+                onChange={(e) => handleInputChange(e)}
+                placeholder="Enter string"
+                className='inputStyle'
+              />
+              <button onClick={handleSubmit} style={ButtonStyle}>
+                Test
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className='mainContentStyle'>
+        <div className="divSymbolsStyle">
+          {symbols.length > 0 && <h2>Alfabeto: {symbols.join(", ")}</h2>}
+        </div>
+
+        {activeTab === "NFA" && nfa && (
+          <NFATab automaton={nfa} symbols={symbols} cadena={finalString} />
         )}
-      </div>
 
-      {/* Pestañas para alternar entre NFA, uDFA y DFA */}
-      <div className="tabs">
-        <button onClick={() => setActiveTab('NFA')} className={activeTab === 'NFA' ? 'active' : ''}>
-          NFA
-        </button>
-        <button onClick={() => setActiveTab('uDFA')} className={activeTab === 'uDFA' ? 'active' : ''}>
-          uDFA
-        </button>
-        <button onClick={() => setActiveTab('DFA')} className={activeTab === 'DFA' ? 'active' : ''}>
-          mDFA
-        </button>
-      </div>
-
-      {/* Renderizar la pestaña correspondiente */}
-      {activeTab === 'NFA' && nfa && (
-        <NFATab automaton={nfa} symbols={symbols} cadena={finalString} />
-      )}
-
-      {activeTab === 'uDFA' && udfaTransitions && estadoInicial && estadosFinales && estadoLetra && (
-        <DFATab
-          dfaTransitions={udfaTransitions} // Renderizar las transiciones originales del uDFA
-          symbols={symbols}
-          estadosFinales={estadosFinales}
-          estadoInicial={estadoInicial}
-          conjuntoAFNMap={estadoLetra}
-          cadena={finalString}
-          isMinimized={false} // uDFA
-        />
-      )}
-
-      {activeTab === 'DFA' && mdfaTransitions && mdfestadosFinales && estadosSignificativos && estadoInicial && estadosIdenticos && (
-        <DFATab
-          dfaTransitions={mdfaTransitions} // Renderizar las transiciones minimizadas del mDFA
-          symbols={symbols}
-          estadosFinales={mdfestadosFinales}
-          estadoInicial={estadoInicial}
-          estadosSignifitivos={estadosSignificativos}
-          estadosIdenticos={estadosIdenticos}
-          cadena={finalString}
-          isMinimized={true} // mDFA
-        />
-      )}
+        {activeTab === "uDFA" &&
+          udfaTransitions &&
+          estadoInicial &&
+          estadosFinales &&
+          estadoLetra && (
+            <DFATab
+              dfaTransitions={udfaTransitions}
+              symbols={symbols}
+              estadosFinales={estadosFinales}
+              estadoInicial={estadoInicial}
+              conjuntoAFNMap={estadoLetra}
+              cadena={finalString}
+              isMinimized={false} // uDFA
+            />
+          )}
+        {activeTab === "DFA" &&
+          mdfaTransitions &&
+          mdfestadosFinales &&
+          estadosSignificativos &&
+          estadoInicial &&
+          estadosIdenticos && (
+            <DFATab
+              dfaTransitions={mdfaTransitions}
+              symbols={symbols}
+              estadosFinales={mdfestadosFinales}
+              estadoInicial={estadoInicial}
+              estadosSignifitivos={estadosSignificativos}
+              estadosIdenticos={estadosIdenticos}
+              cadena={finalString}
+              isMinimized={true} // mDFA
+            />
+          )}
+      </main>
     </div>
   );
-};
+}
+
 
 export default AutomatonBuilder;
