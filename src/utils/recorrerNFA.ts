@@ -12,22 +12,27 @@ export function recorrerNFA(
   let esAceptado = false;
 
   // Pila para realizar el backtracking y manejar múltiples rutas
-  const stack: { estadoActual: string, restanteCadena: string, visitados: Set<string>, transicionesPendientes: any[] }[] = [];
+  const stack: { estadoActual: string, restanteCadena: string, recorridoActual: { estadoActual: string, siguienteEstado: string, simbolo: string }[] }[] = [];
 
   // Iniciamos desde el estado inicial
-  stack.push({ 
-    estadoActual: estadoInicial, 
-    restanteCadena: cadena, 
-    visitados: new Set([estadoInicial]), 
-    transicionesPendientes: [] 
+  stack.push({
+    estadoActual: estadoInicial,
+    restanteCadena: cadena === "&" ? "" : cadena, // Si la cadena es "&", la tratamos como vacía
+    recorridoActual: []
   });
 
-  while (stack.length > 0) {
-    const { estadoActual, restanteCadena, visitados, transicionesPendientes } = stack.pop()!;
+  let ultimoRecorrido: { estadoActual: string, siguienteEstado: string, simbolo: string }[] = []; // Guardar el último recorrido antes de fallar
 
-    // Si el estado actual es un estado final, terminamos el recorrido
+  while (stack.length > 0) {
+    const { estadoActual, restanteCadena, recorridoActual } = stack.pop()!;
+
+    // Guardamos el último recorrido válido
+    ultimoRecorrido = [...recorridoActual];
+
+    // Si hemos llegado a un estado final y no queda cadena, la cadena es aceptada
     if (estadosFinales.has(estadoActual) && restanteCadena.length === 0) {
       esAceptado = true;
+      recorrido.push(...recorridoActual); // Agregar el camino final completo al recorrido
       break;
     }
 
@@ -35,55 +40,41 @@ export function recorrerNFA(
     const fila = transitions.find(row => row.state === Number(estadoActual));
 
     if (fila) {
-      const nuevasTransicionesPendientes: { estadoActual: string, siguienteEstado: string, simbolo: string, restanteCadena: string }[] = [];
-
       // Explorar todas las transiciones del estado actual
       for (const simbolo in fila.transitions) {
         const estadosSiguientes = fila.transitions[simbolo];
 
+        // Verificamos si la transición es por epsilon ('&') o coincide con el siguiente símbolo en la cadena
         if (simbolo === '&' || (restanteCadena.length > 0 && simbolo === restanteCadena[0])) {
           for (const siguienteEstado of estadosSiguientes!) {
             const siguienteEstadoString = siguienteEstado.toString();
 
-            // Evitar ciclos infinitos revisando si ya hemos visitado este estado
-            if (!visitados.has(siguienteEstadoString)) {
-              const nuevosVisitados = new Set(visitados);
-              nuevosVisitados.add(siguienteEstadoString);
+            // Crear un nuevo camino con la transición agregada
+            const nuevoRecorrido = [...recorridoActual, {
+              estadoActual,
+              siguienteEstado: siguienteEstadoString,
+              simbolo: simbolo === '&' ? '&' : restanteCadena[0]
+            }];
 
-              // Añadir al recorrido
-              recorrido.push({
-                estadoActual,
-                siguienteEstado: siguienteEstadoString,
-                simbolo: simbolo === '&' ? '&' : restanteCadena[0]
-              });
+            // Si la transición fue por un símbolo (no epsilon), consumimos un símbolo de la cadena
+            const siguienteCadena = simbolo === '&' ? restanteCadena : restanteCadena.slice(1);
 
-              // Si la transición fue por un símbolo (no epsilon), consumimos un símbolo de la cadena
-              const siguienteCadena = simbolo === '&' ? restanteCadena : restanteCadena.slice(1);
-
-              // Si hay más de una opción, las opciones no exploradas se empujan a las pendientes
-              nuevasTransicionesPendientes.push({
-                estadoActual: siguienteEstadoString,
-                siguienteEstado: siguienteEstadoString,
-                simbolo,
-                restanteCadena: siguienteCadena
-              });
-            }
+            // Añadir el nuevo estado y cadena a la pila
+            stack.push({
+              estadoActual: siguienteEstadoString,
+              restanteCadena: siguienteCadena,
+              recorridoActual: nuevoRecorrido
+            });
           }
         }
       }
-
-      // Si hay transiciones pendientes no exploradas, las guardamos para explorarlas después
-      while (nuevasTransicionesPendientes.length > 0) {
-        const siguienteTransicion = nuevasTransicionesPendientes.pop()!;
-        stack.push({
-          estadoActual: siguienteTransicion.siguienteEstado,
-          restanteCadena: siguienteTransicion.restanteCadena,
-          visitados: new Set(visitados),
-          transicionesPendientes: nuevasTransicionesPendientes
-        });
-      }
     }
   }
-  console.log(recorrido, esAceptado)
+
+  // Si no se aceptó la cadena, devolvemos el último recorrido válido
+  if (!esAceptado) {
+    recorrido.push(...ultimoRecorrido);
+  }
+  
   return { recorrido, esAceptado };
 }
