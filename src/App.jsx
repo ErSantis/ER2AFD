@@ -1,10 +1,13 @@
 import "./App.css";
 import AutomataBuilder from "./components/AutomatonBuilder";
+import { AutomatonProvider } from "./components/AutomatonContext"; // Importa el proveedor del contexto
 
 function App() {
   return (
     <div className="App">
-      <AutomataBuilder />
+      <AutomatonProvider>
+        <AutomataBuilder />
+      </AutomatonProvider>
     </div>
   );
 }

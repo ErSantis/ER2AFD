@@ -3,7 +3,7 @@ import DynamicAutomaton from './DynamicAutomaton';
 import TransitionTable from './NFATransitionTable';
 import { NFATabProps } from '../types/NFATab.type';
 
-const NFATab: React.FC<NFATabProps> = ({ automaton, symbols, cadena }) => {
+const NFATab: React.FC<NFATabProps> = ({ automaton}) => {
   return (
     <div className="nfa-tab-container">
       
@@ -12,8 +12,6 @@ const NFATab: React.FC<NFATabProps> = ({ automaton, symbols, cadena }) => {
         <DynamicAutomaton 
           automatonType="NFA"
           automaton={automaton}
-          symbols={symbols}
-          cadena={cadena} // Cadena de entrada para el recorrido
         />
       </div>
 
