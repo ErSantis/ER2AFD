@@ -22,12 +22,13 @@ export function recorrerDFA(
     };
   }
 
+  // Agregar el estado inicial al recorrido, incluso si no hay transición
+  recorrido.push({ estadoActual, siguienteEstado: estadoActual, simbolo: cadena[0] || "ε" });
+
   // Iteramos sobre cada símbolo en la cadena
   for (let i = 0; i < cadena.length; i++) {
     const simbolo = cadena[i];
     const transiciones = dfaTransitions.get(estadoActual);
-
-
 
     // Verificamos si existen transiciones para el estado actual
     if (transiciones) {
@@ -50,6 +51,7 @@ export function recorrerDFA(
   // Después de consumir toda la cadena, verificamos si el estado actual es de aceptación
   const esAceptado = estadosFinales.has(estadoActual);
 
+  console.log(recorrido);
   // Devolvemos el recorrido y si la cadena es aceptada
   return { recorrido, esAceptado };
 }

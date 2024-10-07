@@ -48,7 +48,6 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
 
     useEffect(() => {
 
-        console.log(runSimulation)
 
         if (!runSimulation) return;
 
