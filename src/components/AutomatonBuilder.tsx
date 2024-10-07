@@ -69,15 +69,15 @@ const AutomatonBuilder: React.FC = () => {
   const validateRegex = (input: string) => {
     // Si el input está vacío, deshabilitamos el botón
     if (input.trim() === '') {
-        setIsButtonEnabled(false);
-        return;
+      setIsButtonEnabled(false);
+      return;
     }
 
     // Validar que empiece con algo válido (un carácter o una expresión entre paréntesis)
     const validStartRegex = /^([^)\\|*?+]+.*)$/;
     if (!validStartRegex.test(input)) {
-        setIsButtonEnabled(false);
-        return;
+      setIsButtonEnabled(false);
+      return;
     }
 
     // Validar que no contenga caracteres reservados
@@ -90,19 +90,19 @@ const AutomatonBuilder: React.FC = () => {
     // Validar que no se repitan más de una vez los caracteres ?, +, y *
     const invalidRepeatRegex = /(\?|\+|\*)(\?|\+|\*)+/;
     if (invalidRepeatRegex.test(input)) {
-        setIsButtonEnabled(false);
-        return;
+      setIsButtonEnabled(false);
+      return;
     }
 
     // Validar que los | tengan algo a ambos lados
     const arePipesValid = (input: string): boolean => {
       // Asegurarse de que no haya pipes consecutivos sin nada válido entre ellos
       const invalidPipesRegex = /\|\||\(\||\|\)|\|[*+?)]|(?<!\()\|(?=\))/;
-  
+
       // Retorna true si no hay casos de pipes inválidos
       return !invalidPipesRegex.test(input);
     };
-  
+
     // Si el input contiene un pipe y no pasa la validación de pipes, desactiva el botón
     if (input.includes("|") && !arePipesValid(input)) {
       setIsButtonEnabled(false);
@@ -118,27 +118,27 @@ const AutomatonBuilder: React.FC = () => {
       setIsButtonEnabled(false);
       return;
     }
-  
+
 
     // Validar que los paréntesis estén balanceados
     const areParenthesesBalanced = (str: string): boolean => {
-        let stack: string[] = [];
-        for (let char of str) {
-            if (char === '(') {
-                stack.push(char);
-            } else if (char === ')') {
-                if (stack.length === 0) {
-                    return false;
-                }
-                stack.pop();
-            }
+      let stack: string[] = [];
+      for (let char of str) {
+        if (char === '(') {
+          stack.push(char);
+        } else if (char === ')') {
+          if (stack.length === 0) {
+            return false;
+          }
+          stack.pop();
         }
-        return stack.length === 0;
+      }
+      return stack.length === 0;
     };
 
     if (!areParenthesesBalanced(input)) {
-        setIsButtonEnabled(false);
-        return;
+      setIsButtonEnabled(false);
+      return;
     }
     setIsButtonEnabled(true);
   };
@@ -211,7 +211,7 @@ const AutomatonBuilder: React.FC = () => {
     setTimeout(() => setFinalString(inputString), 0); // Establece la cadena final nuevamente con un pequeño retraso
   };
 
-  
+
   return (
     <div>
       <header className='headerStyle'>
@@ -242,7 +242,7 @@ const AutomatonBuilder: React.FC = () => {
               mDFA
             </button>
           </div>
-  
+
           <div className='inputContainerStyle'>
             <div style={{ display: "flex", gap: "10px" }}>
               <input
@@ -257,7 +257,7 @@ const AutomatonBuilder: React.FC = () => {
                   handleBuildAutomata();
                   setActiveTab("NFA");
                 }}
-                style={ButtonStyle}
+                style={!isButtonEnabled ? { ...ButtonStyle, opacity: 0.5, cursor: 'not-allowed' } : ButtonStyle}
               >
                 Build Automata
               </button>
@@ -277,16 +277,16 @@ const AutomatonBuilder: React.FC = () => {
           </div>
         </div>
       </header>
-  
+
       <main className='mainContentStyle'>
         <div className="divSymbolsStyle">
           {symbols.length > 0 && <h2>Alfabeto: {symbols.join(", ")}</h2>}
         </div>
-  
+
         {activeTab === "NFA" && nfa && (
           <NFATab automaton={nfa} symbols={symbols} cadena={finalString} />
         )}
-        
+
         {activeTab === "uDFA" &&
           udfaTransitions &&
           estadoInicial &&
@@ -323,6 +323,6 @@ const AutomatonBuilder: React.FC = () => {
     </div>
   );
 }
-  
+
 
 export default AutomatonBuilder;
