@@ -30,6 +30,11 @@ export const validateRegex = (input: string, setIsButtonEnabled: (enabled: boole
     const arePipesValid = (input: string): boolean => {
         // Asegurarse de que no haya pipes consecutivos sin nada válido entre ellos
         const invalidPipesRegex = /\|\||\(\||\|\)|\|[*+?)]|(?<!\()\|(?=\))/;
+        
+        // Verificar si termina con un | 
+        if (input.endsWith("|")) {
+            return false;
+          }
 
         // Retorna true si no hay casos de pipes inválidos
         return !invalidPipesRegex.test(input);
