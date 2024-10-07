@@ -50,7 +50,6 @@ const AutomatonBuilder: React.FC = () => {
 
 
   const resetAutomata = () => {
-
     setSymbols([]); // Resetea los símbolos a un array vacío
     setNFA(null); // Resetea el NFA (Non-deterministic Finite Automaton) a null
     //setFinalString(''); // Resetea la cadena final a una cadena vacía
@@ -62,7 +61,6 @@ const AutomatonBuilder: React.FC = () => {
     setEstadoInicial(null); // Resetea el estado inicial a null
     setEstadosSignificativos(new Map()); // Resetea los estados significativos a un nuevo Map vacío
     setEstadosIdenticos(new Map()); // Resetea los estados idénticos a un nuevo Map vacío
-
   };
 
   // Valida el input para construir el automata
@@ -83,7 +81,6 @@ const AutomatonBuilder: React.FC = () => {
 
   // Construye el autómata
   const handleBuildAutomata = () => {
-
     resetAutomata(); // Limpiar los estados anteriores
 
     setSymbols(extractSymbolsFromRegxex(regex)); // Extraer los símbolos del alfabeto
@@ -98,15 +95,19 @@ const AutomatonBuilder: React.FC = () => {
 
   // Construye el uDFA a partir del NFA
   const handleuDFA = (nfa: Automaton, symbols: string[]) => {
-
-    const { transicionesAFD, conjuntoAFNMap, estadosFinales, estadoInicial, estadosSignificativosMap } = buildDFAFromNFA(nfa, symbols);
+    const {
+      transicionesAFD,
+      conjuntoAFNMap,
+      estadosFinales,
+      estadoInicial,
+      estadosSignificativosMap,
+    } = buildDFAFromNFA(nfa, symbols);
 
     setuDFATransitions(transicionesAFD); // Guardar las transiciones originales del uDFA
     setEstadoLetra(conjuntoAFNMap); // Establecer el estado de las letras con el conjunto AFN
     setEstadosFinales(estadosFinales); // Establecer los estados finales
     setEstadoInicial(estadoInicial); // Establecer el estado inicial
     setEstadosSignificativos(estadosSignificativosMap); // Establecer los estados significativos con el Map correspondiente
-
   };
 
   // Construye el mDFA minimizando el uDFA
@@ -125,7 +126,6 @@ const AutomatonBuilder: React.FC = () => {
       setmDFATransitions(nuevasTransicionesAFD); // Guardar las transiciones minimizadas del mDFA
       setmdfEstadosFinales(nuevosEstadosFinales); // Establecer los nuevos estados finales minimizados
       setEstadosIdenticos(gruposEquivalentes); // Establecer los grupos de estados equivalentes
-
     }
   };
 
@@ -154,43 +154,22 @@ const AutomatonBuilder: React.FC = () => {
 
   return (
     <div>
-      <header className='headerStyle'>
-        <div className='containerStyle'>
-          <a href="/">
-            <img className='logoStyle' src="./logo.png" alt="Logo" />
-          </a>
-          <div className='buttonsContainerStyle'>
-            <button
-              onClick={() => setActiveTab("NFA")}
-              className={activeTab === "NFA" ? "active" : ""}
-              style={ButtonStyle}
-            >
-              NFA
-            </button>
-            <button
-              onClick={() => setActiveTab("uDFA")}
-              className={activeTab === "uDFA" ? "active" : ""}
-              style={ButtonStyle}
-            >
-              uDFA
-            </button>
-            <button
-              onClick={() => setActiveTab("DFA")}
-              className={activeTab === "DFA" ? "active" : ""}
-              style={ButtonStyle}
-            >
-              mDFA
-            </button>
+      <header className="headerStyle">
+        <div className="containerStyle">
+          <div className="logoContainerStyle">
+            <a href="/">
+              <img className="logoStyle" src="./logo.png" alt="Logo" />
+            </a>
           </div>
 
-          <div className='inputContainerStyle'>
-            <div style={{ display: "flex", gap: "10px" }}>
+          <div className="inputContainerStyle">
+            <div className="inputWrapperStyle">
               <input
                 type="text"
                 value={regex}
                 onChange={(e) => setRegex(e.target.value)}
                 placeholder="Enter regular expression"
-                className='inputStyle'
+                className="inputStyle"
               />
               <button
                 onClick={() => {
@@ -203,23 +182,55 @@ const AutomatonBuilder: React.FC = () => {
                 Build Automata
               </button>
             </div>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div className="inputWrapperStyle">
               <input
                 type="text"
                 value={inputString}
                 onChange={(e) => handleInputChange(e)}
                 placeholder="Enter string"
-                className='inputStyle'
+                className="inputStyle"
               />
-              <button onClick={handleSubmit} style={ButtonStyle}>
+              <button onClick={handleSubmit} className="buttonStyle">
                 Test
               </button>
+            </div>
+          </div>
+
+          <div className="noteContainer">
+            <div className="note">
+              <p>
+                <b>Nota:</b> Para hacer referencia a cadena vacía, usa el
+                símbolo "&".
+              </p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className='mainContentStyle'>
+      <main className="mainContentStyle">
+        <div className="buttonsContainerStyle">
+          <button
+            onClick={() => setActiveTab("NFA")}
+            className={activeTab === "NFA" ? "active" : ""}
+            style={ButtonStyle}
+          >
+            NFA
+          </button>
+          <button
+            onClick={() => setActiveTab("uDFA")}
+            className={activeTab === "uDFA" ? "active" : ""}
+            style={ButtonStyle}
+          >
+            uDFA
+          </button>
+          <button
+            onClick={() => setActiveTab("DFA")}
+            className={activeTab === "DFA" ? "active" : ""}
+            style={ButtonStyle}
+          >
+            mDFA
+          </button>
+        </div>
         <div className="divSymbolsStyle">
           {symbols.length > 0 && <h2>Alfabeto: {symbols.join(", ")}</h2>}
         </div>
@@ -259,7 +270,6 @@ const AutomatonBuilder: React.FC = () => {
       </main>
     </div>
   );
-}
-
+};
 
 export default AutomatonBuilder;
