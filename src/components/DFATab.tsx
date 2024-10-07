@@ -4,19 +4,18 @@ import StateMap from './DFASubsetsTable';
 import { DFATabProps } from '../types/DFATab.type';
 import DynamicAutomaton from './DynamicAutomaton';
 import { formatIdenticalStates } from '../utils/formatIdenticalStates';
+import { useAutomatonContext } from './AutomatonContext';
 
 const DFATab: React.FC<DFATabProps> = ({
   dfaTransitions,
-  symbols,
   estadosFinales,
   estadoInicial,
   conjuntoAFNMap,
   estadosSignifitivos,
   isMinimized,
   estadosIdenticos,
-  cadena
 }) => {
-
+  const { symbols } = useAutomatonContext()
   return (
     <div className="dfatab-container">
       <div className="dfatab-automaton-container">
@@ -24,10 +23,8 @@ const DFATab: React.FC<DFATabProps> = ({
 
         <DynamicAutomaton
           dfaTransitions={dfaTransitions}
-          symbols={symbols}
           estadosFinales={estadosFinales}
           estadoInicial={estadoInicial}
-          cadena={cadena}
           automatonType={'DFA'}
         />
       </div>

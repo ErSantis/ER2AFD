@@ -6,16 +6,23 @@ import { recorrerNFA } from '../utils/recorrerNFA';
 import { generateTable } from '../utils/generateTable';
 import { DynamicAutomatonPros } from '../types/DynamicAutomaton.type';
 import '../styles/DynamicAutomaton.css'
+import { useAutomatonContext } from './AutomatonContext';
 
-const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, automaton, dfaTransitions, symbols, estadosFinales, estadoInicial, cadena }) => {
+const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, automaton, dfaTransitions, estadosFinales, estadoInicial }) => {
+
+    const { finalString } = useAutomatonContext();
+    const { symbols } = useAutomatonContext();
+    const { runSimulation, setRunSimulation } = useAutomatonContext();
+
+
     const [recorrido, setRecorrido] = useState<{ estadoActual: string, siguienteEstado: string, simbolo: string }[]>([]);
     const [currentStep, setCurrentStep] = useState<number>(0);
     const [estadoResaltado, setEstadoResaltado] = useState<string | null>(null);
     const [transicionResaltada, setTransicionResaltada] = useState<{ estadoActual: string, siguienteEstado: string, simbolo: string } | null>(null);
     const [estadoFinalAlcanzado, setEstadoFinalAlcanzado] = useState<string | null>(null);
-    const [resetColors, setResetColors] = useState<boolean>(false); 
-    const [esAceptado, setEsAceptado] = useState<boolean>(false); 
-    const [mensaje, setMensaje] = useState<string | null>(null); 
+    const [resetColors, setResetColors] = useState<boolean>(false);
+    const [esAceptado, setEsAceptado] = useState<boolean>(false);
+    const [mensaje, setMensaje] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<'success' | 'error' | null>(null);
 
     // Obtener los estados finales desde el autómata si no se pasaron explícitamente
@@ -23,9 +30,9 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
         if (estadosFinales) {
             return estadosFinales;
         } else if (automaton && automaton.acceptState) {
-            return new Set([automaton.acceptState.id.toString()]);  
+            return new Set([automaton.acceptState.id.toString()]);
         } else {
-            return new Set();  
+            return new Set();
         }
     };
 
@@ -33,56 +40,62 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
         if (estadoInicial) {
             return estadoInicial;
         } else if (automaton && automaton.startState) {
-            return automaton.startState.id.toString();  
+            return automaton.startState.id.toString();
         } else {
-            return '';  
+            return '';
         }
     };
 
     useEffect(() => {
-        if (cadena === '') {
+
+        console.log(runSimulation)
+
+        if (!runSimulation) return;
+
+        if (finalString === '') {
             return;
         }
 
         setMensaje(null); // Reiniciamos el mensaje cuando empieza un nuevo recorrido.
-        
+
         const estadoInicialCalculado = obtenerEstadoInicial();
-        const estadosFinalesCalculados = obtenerEstadosFinales(); 
+        const estadosFinalesCalculados = obtenerEstadosFinales();
 
         if (automatonType === 'DFA') {
-            const { recorrido, esAceptado } = recorrerDFA(cadena, dfaTransitions!, estadoInicialCalculado, estadosFinalesCalculados);
+            const { recorrido, esAceptado } = recorrerDFA(finalString, dfaTransitions!, estadoInicialCalculado, estadosFinalesCalculados);
             setRecorrido(recorrido);
             setEsAceptado(esAceptado);
         } else {
             const table = generateTable(automaton!);
-            const { recorrido, esAceptado } = recorrerNFA(cadena, table.transitions, symbols, estadoInicialCalculado, estadosFinalesCalculados);
+            const { recorrido, esAceptado } = recorrerNFA(finalString, table.transitions, symbols, estadoInicialCalculado, estadosFinalesCalculados);
             setRecorrido(recorrido);
             setEsAceptado(esAceptado);
         }
         setCurrentStep(0);
         setEstadoFinalAlcanzado(null);
-        setResetColors(false); 
-    }, [cadena, automaton, automatonType, estadoInicial, estadosFinales]);
+        setResetColors(false);
+        setRunSimulation(false);
+    }, [finalString, automaton, automatonType, estadoInicial, estadosFinales]);
 
     useEffect(() => {
         if (currentStep < recorrido.length) {
             const transicion = recorrido[currentStep];
 
             setEstadoResaltado(transicion.estadoActual);
-            setTransicionResaltada(null); 
+            setTransicionResaltada(null);
 
             const estadoTimeoutId = setTimeout(() => {
                 setTransicionResaltada({
                     estadoActual: transicion.estadoActual,
                     siguienteEstado: transicion.siguienteEstado,
-                    simbolo: transicion.simbolo,  
+                    simbolo: transicion.simbolo,
                 });
 
                 if (currentStep === recorrido.length - 1) {
                     const estadoFinalTimeoutId = setTimeout(() => {
                         setEstadoResaltado(null);
                         setTransicionResaltada(null);
-                        setEstadoFinalAlcanzado(transicion.siguienteEstado); 
+                        setEstadoFinalAlcanzado(transicion.siguienteEstado);
 
                         // Mostrar el mensaje al terminar el recorrido
                         if (esAceptado) {
@@ -94,11 +107,11 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
                         }
 
                         const resetFinalTimeoutId = setTimeout(() => {
-                            setEstadoFinalAlcanzado(null); 
-                        }, 1000); 
+                            setEstadoFinalAlcanzado(null);
+                        }, 1000);
 
                         return () => clearTimeout(resetFinalTimeoutId);
-                    }, 500); 
+                    }, 500);
 
                     return () => clearTimeout(estadoFinalTimeoutId);
                 }
@@ -108,26 +121,27 @@ const DynamicAutomaton: React.FC<DynamicAutomatonPros> = ({ automatonType, autom
                 }, 500);
 
                 return () => clearTimeout(transicionTimeoutId);
-            }, 500); 
+            }, 500);
 
             return () => clearTimeout(estadoTimeoutId);
         } else {
             setEstadoResaltado(null);
             setTransicionResaltada(null);
-            setEstadoFinalAlcanzado(null); 
+            setEstadoFinalAlcanzado(null);
         }
+
     }, [currentStep, recorrido]);
 
     const dot = automatonType === 'DFA' ?
         dfaToDot(
             Array.from(dfaTransitions!.entries()),
             symbols,
-            obtenerEstadosFinales(),  
+            obtenerEstadosFinales(),
             estadoInicial!,
             recorrido,
-            resetColors ? null : estadoResaltado,  
+            resetColors ? null : estadoResaltado,
             resetColors ? null : transicionResaltada,
-            esAceptado ? estadoFinalAlcanzado : null 
+            esAceptado ? estadoFinalAlcanzado : null
         )
         : nfaToDot(automaton!, recorrido, estadoResaltado, transicionResaltada, esAceptado ? estadoFinalAlcanzado : null);
 
