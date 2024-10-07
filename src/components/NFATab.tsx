@@ -5,20 +5,22 @@ import { NFATabProps } from '../types/NFATab.type';
 
 const NFATab: React.FC<NFATabProps> = ({ automaton, symbols, cadena }) => {
   return (
-    <div>
-      <h2>Automata Finito No Determinista (NFA)</h2>
+    <div className="nfa-tab-container">
       
-      {/* Renderizar el gráfico del NFA de forma dinámica */}
-      <DynamicAutomaton 
-        automatonType="NFA"
-        automaton={automaton}
-        symbols={symbols}
-        cadena={cadena} // Cadena de entrada para el recorrido
-      />
+      <div className="automaton-container">
+      <h2>Automata Finito No Determinista (NFA)</h2>
+        <DynamicAutomaton 
+          automatonType="NFA"
+          automaton={automaton}
+          symbols={symbols}
+          cadena={cadena} // Cadena de entrada para el recorrido
+        />
+      </div>
 
-      {/* Renderizar la tabla de transiciones del NFA */}
+      <div className="transition-table-container">
       <h2>Tabla de transiciones del NFA</h2>
-      <TransitionTable automaton={automaton} />
+        <TransitionTable automaton={automaton} />
+      </div>
     </div>
   );
 };

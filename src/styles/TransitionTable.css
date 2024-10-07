@@ -6,6 +6,8 @@
     margin: 20px auto;
     border-collapse: collapse;
     text-align: center;
+    border: #213547 2px solid;
+
   }
   
   .transition-table th, .transition-table td {
