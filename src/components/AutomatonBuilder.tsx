@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { buildNFAFromRegex } from '../utils/BuildNFA';
-import { buildDFAFromNFA } from '../utils/BuildDFA';
-import { buildmDFAFromuDFA } from '../utils/BuildmDFA';
-import NFATab from './NFATab';
-import DFATab from './DFATab';
-import { Automaton } from '../models/Automaton';
-import { extractSymbolsFromRegxex } from '../utils/extractSymbols';
-import { State } from '../models/State';
-import { ButtonStyle } from '../styles/ButtonStyle';
+import React, { useEffect, useState } from "react";
+import { buildNFAFromRegex } from "../utils/BuildNFA";
+import { buildDFAFromNFA } from "../utils/BuildDFA";
+import { buildmDFAFromuDFA } from "../utils/BuildmDFA";
+import NFATab from "./NFATab";
+import DFATab from "./DFATab";
+import { Automaton } from "../models/Automaton";
+import { extractSymbolsFromRegxex } from "../utils/extractSymbols";
+import { State } from "../models/State";
+import { ButtonStyle } from "../styles/ButtonStyle";
 
 const AutomatonBuilder: React.FC = () => {
   const [regex, setRegex] = useState<string>(""); // Expresión regular ingresada por el usuario
@@ -21,27 +21,37 @@ const AutomatonBuilder: React.FC = () => {
     Map<string, string>
   > | null>(null); // Transiciones del mDFA (AFD minimizado)
   const [symbols, setSymbols] = useState<string[]>([]); // Símbolos del alfabeto
-  const [activeTab, setActiveTab] = useState<'NFA' | 'uDFA' | 'DFA'>('NFA'); // Controla la pestaña activa
-  const [estadoLetra, setEstadoLetra] = useState<Map<string, Set<State>> | null>(null); // Relacion entre el estado DFA - conjunto AFN
-  const [estadosFinales, setEstadosFinales] = useState<Set<string> | null>(null); // Estados finales deL UDFA
-  const [mdfestadosFinales, setmdfEstadosFinales] = useState<Set<string> | null>(null);// Estados Finlaes del mDFA
+  const [activeTab, setActiveTab] = useState<"NFA" | "uDFA" | "DFA">("NFA"); // Controla la pestaña activa
+  const [estadoLetra, setEstadoLetra] = useState<Map<
+    string,
+    Set<State>
+  > | null>(null); // Relacion entre el estado DFA - conjunto AFN
+  const [estadosFinales, setEstadosFinales] = useState<Set<string> | null>(
+    null
+  ); // Estados finales deL UDFA
+  const [mdfestadosFinales, setmdfEstadosFinales] =
+    useState<Set<string> | null>(null); // Estados Finlaes del mDFA
   const [estadoInicial, setEstadoInicial] = useState<string | null>(null); // Estado Inicial de los DFA
-  const [estadosSignificativos, setEstadosSignificativos] = useState<Map<string, Set<State>> | null>(null); // Estados significativos del AFN
-  const [estadosIdenticos, setEstadosIdenticos] = useState<Map<string, string[]> | null>(null); //Estados que se identifican(Mimso conjunto de estados significativos)
+  const [estadosSignificativos, setEstadosSignificativos] = useState<Map<
+    string,
+    Set<State>
+  > | null>(null); // Estados significativos del AFN
+  const [estadosIdenticos, setEstadosIdenticos] = useState<Map<
+    string,
+    string[]
+  > | null>(null); //Estados que se identifican(Mimso conjunto de estados significativos)
 
   const [isButtonEnabled, setIsButtonEnabled] = useState(false); // Estado para habilitar o deshabilitar el botón
 
   const [inputString, setInputString] = useState(""); // Estado para controlar el input
   const [finalString, setFinalString] = useState(""); // Estado para guardar el valor cuando se presiona el botón
 
-  const [runSimulation, SetRunSimulation] = useState<boolean>(false)
-
+  const [runSimulation, SetRunSimulation] = useState<boolean>(false);
 
   const resetAutomata = () => {
-
     setSymbols([]); // Resetea los símbolos a un array vacío
     setNFA(null); // Resetea el NFA (Non-deterministic Finite Automaton) a null
-    setFinalString(''); // Resetea la cadena final a una cadena vacía
+    setFinalString(""); // Resetea la cadena final a una cadena vacía
     setuDFATransitions(new Map()); // Limpia las transiciones uDFA (unminimized Deterministic Finite Automaton)
     setmDFATransitions(new Map()); // Limpia las transiciones mDFA (minimized Deterministic Finite Automaton)
     setEstadoLetra(new Map()); // Resetea el estado de las letras a un nuevo Map vacío
@@ -50,7 +60,6 @@ const AutomatonBuilder: React.FC = () => {
     setEstadoInicial(null); // Resetea el estado inicial a null
     setEstadosSignificativos(new Map()); // Resetea los estados significativos a un nuevo Map vacío
     setEstadosIdenticos(new Map()); // Resetea los estados idénticos a un nuevo Map vacío
-
   };
 
   // Valida el input para construir el automata
@@ -68,7 +77,7 @@ const AutomatonBuilder: React.FC = () => {
   // Función de validación
   const validateRegex = (input: string) => {
     // Si el input está vacío, deshabilitamos el botón
-    if (input.trim() === '') {
+    if (input.trim() === "") {
       setIsButtonEnabled(false);
       return;
     }
@@ -119,14 +128,13 @@ const AutomatonBuilder: React.FC = () => {
       return;
     }
 
-
     // Validar que los paréntesis estén balanceados
     const areParenthesesBalanced = (str: string): boolean => {
       let stack: string[] = [];
       for (let char of str) {
-        if (char === '(') {
+        if (char === "(") {
           stack.push(char);
-        } else if (char === ')') {
+        } else if (char === ")") {
           if (stack.length === 0) {
             return false;
           }
@@ -145,7 +153,6 @@ const AutomatonBuilder: React.FC = () => {
 
   // Construye el autómata
   const handleBuildAutomata = () => {
-
     resetAutomata(); // Limpiar los estados anteriores
 
     setSymbols(extractSymbolsFromRegxex(regex)); // Extraer los símbolos del alfabeto
@@ -160,15 +167,19 @@ const AutomatonBuilder: React.FC = () => {
 
   // Construye el uDFA a partir del NFA
   const handleuDFA = (nfa: Automaton, symbols: string[]) => {
-
-    const { transicionesAFD, conjuntoAFNMap, estadosFinales, estadoInicial, estadosSignificativosMap } = buildDFAFromNFA(nfa, symbols);
+    const {
+      transicionesAFD,
+      conjuntoAFNMap,
+      estadosFinales,
+      estadoInicial,
+      estadosSignificativosMap,
+    } = buildDFAFromNFA(nfa, symbols);
 
     setuDFATransitions(transicionesAFD); // Guardar las transiciones originales del uDFA
     setEstadoLetra(conjuntoAFNMap); // Establecer el estado de las letras con el conjunto AFN
     setEstadosFinales(estadosFinales); // Establecer los estados finales
     setEstadoInicial(estadoInicial); // Establecer el estado inicial
     setEstadosSignificativos(estadosSignificativosMap); // Establecer los estados significativos con el Map correspondiente
-
   };
 
   // Construye el mDFA minimizando el uDFA
@@ -187,14 +198,12 @@ const AutomatonBuilder: React.FC = () => {
       setmDFATransitions(nuevasTransicionesAFD); // Guardar las transiciones minimizadas del mDFA
       setmdfEstadosFinales(nuevosEstadosFinales); // Establecer los nuevos estados finales minimizados
       setEstadosIdenticos(gruposEquivalentes); // Establecer los grupos de estados equivalentes
-
     }
   };
 
   // Lógica para cambiar entre pestañas y recalcular los autómatas
   useEffect(() => {
-
-    if (activeTab === 'uDFA' && nfa) {
+    if (activeTab === "uDFA" && nfa) {
       handleuDFA(nfa, symbols); // Recalcular el uDFA al cambiar a la pestaña
     } else if (activeTab === "DFA" && nfa) {
       handlemDFA(); // Minimizar DFA al cambiar de pestaña
@@ -211,74 +220,89 @@ const AutomatonBuilder: React.FC = () => {
     setTimeout(() => setFinalString(inputString), 0); // Establece la cadena final nuevamente con un pequeño retraso
   };
 
-
   return (
     <div>
-      <header className='headerStyle'>
-        <div className='containerStyle'>
-          <a href="/">
-            <img className='logoStyle' src="./logo.png" alt="Logo" />
-          </a>
-          <div className='buttonsContainerStyle'>
-            <button
-              onClick={() => setActiveTab("NFA")}
-              className={activeTab === "NFA" ? "active" : ""}
-              style={ButtonStyle}
-            >
-              NFA
-            </button>
-            <button
-              onClick={() => setActiveTab("uDFA")}
-              className={activeTab === "uDFA" ? "active" : ""}
-              style={ButtonStyle}
-            >
-              uDFA
-            </button>
-            <button
-              onClick={() => setActiveTab("DFA")}
-              className={activeTab === "DFA" ? "active" : ""}
-              style={ButtonStyle}
-            >
-              mDFA
-            </button>
+      <header className="headerStyle">
+        <div className="containerStyle">
+          <div className="logoContainerStyle">
+            <a href="/">
+              <img className="logoStyle" src="./logo.png" alt="Logo" />
+            </a>
           </div>
 
-          <div className='inputContainerStyle'>
-            <div style={{ display: "flex", gap: "10px" }}>
+          <div className="inputContainerStyle">
+            <div className="inputWrapperStyle">
               <input
                 type="text"
                 value={regex}
                 onChange={(e) => setRegex(e.target.value)}
                 placeholder="Enter regular expression"
-                className='inputStyle'
+                className="inputStyle"
               />
               <button
                 onClick={() => {
                   handleBuildAutomata();
                   setActiveTab("NFA");
                 }}
-                style={!isButtonEnabled ? { ...ButtonStyle, opacity: 0.5, cursor: 'not-allowed' } : ButtonStyle}
+                className="buttonStyle"
+                style={
+                  !isButtonEnabled
+                    ? { opacity: 0.5, cursor: "not-allowed" }
+                    : {}
+                }
               >
                 Build Automata
               </button>
             </div>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div className="inputWrapperStyle">
               <input
                 type="text"
                 value={inputString}
                 onChange={(e) => handleInputChange(e)}
                 placeholder="Enter string"
-                className='inputStyle'
+                className="inputStyle"
               />
-              <button onClick={handleSubmit} style={ButtonStyle}>
+              <button onClick={handleSubmit} className="buttonStyle">
                 Test
               </button>
+            </div>
+          </div>
+
+          <div className="noteContainer">
+            <div className="note">
+              <p>
+                <b>Nota:</b> Para hacer referencia a cadena vacía, usa el
+                símbolo "&".
+              </p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className='mainContentStyle'>
+      <main className="mainContentStyle">
+        <div className="buttonsContainerStyle">
+          <button
+            onClick={() => setActiveTab("NFA")}
+            className={activeTab === "NFA" ? "active" : ""}
+            style={ButtonStyle}
+          >
+            NFA
+          </button>
+          <button
+            onClick={() => setActiveTab("uDFA")}
+            className={activeTab === "uDFA" ? "active" : ""}
+            style={ButtonStyle}
+          >
+            uDFA
+          </button>
+          <button
+            onClick={() => setActiveTab("DFA")}
+            className={activeTab === "DFA" ? "active" : ""}
+            style={ButtonStyle}
+          >
+            mDFA
+          </button>
+        </div>
         <div className="divSymbolsStyle">
           {symbols.length > 0 && <h2>Alfabeto: {symbols.join(", ")}</h2>}
         </div>
@@ -322,7 +346,6 @@ const AutomatonBuilder: React.FC = () => {
       </main>
     </div>
   );
-}
-
+};
 
 export default AutomatonBuilder;
