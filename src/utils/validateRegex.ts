@@ -5,6 +5,15 @@ export const validateRegex = (input: string, setIsButtonEnabled: (enabled: boole
         return;
     }
 
+    // Validar que no haya espacios en blanco
+    const hasSpaces = (input: string): boolean => {
+        return /\s/.test(input);  // Busca cualquier espacio en blanco
+    };
+    if (hasSpaces(input)) {
+        setIsButtonEnabled(false);
+        return;
+    }
+
     // Validar que empiece con algo válido (un carácter o una expresión entre paréntesis)
     const validStartRegex = /^([^)\\|*?+]+.*)$/;
     if (!validStartRegex.test(input)) {
@@ -76,3 +85,7 @@ export const validateRegex = (input: string, setIsButtonEnabled: (enabled: boole
     }
     setIsButtonEnabled(true);
 };
+
+function hasSpaces(input: string) {
+    throw new Error("Function not implemented.");
+}
